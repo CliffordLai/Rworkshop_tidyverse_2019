@@ -19,7 +19,7 @@ output:
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
-setwd("C:/Users/Yi/Dropbox/newtermphd/Term12/Rworkshop_data_manipulation/slide") 
+#setwd("C:/Users/Yi/Dropbox/newtermphd/Term12/Rworkshop_data_manipulation/slide") 
 ```
 
 class: inverse, center, middle
@@ -80,6 +80,19 @@ iris %>%
   xlab("sepal length")+
   ylab("sepal width")
 ```
+
+---
+
+# Outline
+
+.large[
+- Data Transformation
+- Data Visualization
+- Feature Engineering
+- Practise with Titanic
+]
+
+
 
 ---
 class: inverse, center, middle
@@ -606,11 +619,23 @@ See "Titanic_working.Rmd".
 ]
 
 ---
+
+# Wrap-up
+
+.median[
+- Be careful to avoid overfit! (Leakage)
+- Form of stacking: single-variable model which outputs average target.
+- Do in cross-validation manner
+- Add random noise to combat overfit
+- Suitable when a variable has many levels but each of them is not rare.
+]
+---
 class: center, middle
 
 # Thank You!
-<!-- Feedback Link: -->
 
-<!-- https://forms.gle/dbyUnk5SF9UkgkcBA -->
+Please help us make this workshop better
+
+https://forms.gle/qa1gFoTSqFjfGbu2A
 
 

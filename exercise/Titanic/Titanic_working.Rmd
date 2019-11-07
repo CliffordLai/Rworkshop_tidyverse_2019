@@ -25,13 +25,16 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ```{r, message=FALSE, warning=FALSE, results='hide'}
 library(tidyverse)
 library(scales)
-setwd("C:/Users/Yi/Dropbox/newtermphd/Term12/Rworkshop_data_manipulation/exercise/Titanic") 
+# set your own working directory
+setwd("C:/Users/Hao/Dropbox/newtermphd/Term12/Rworkshop_tidyverse_2019/exercise/Titanic/") 
 ```
 
 
 ## Read data
 ```{r data}
 titanic <- read_csv("titanic.csv")
+#library(readxl)
+#titanic <- read_excel("titanic.xlsx") #if you have an excel file
 ```
 
 # Glance at data  {.tabset .tabset-fade}
