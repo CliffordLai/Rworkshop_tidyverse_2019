@@ -24,7 +24,6 @@ $RECYCLE.BIN/
 *.RData
 .Rhistory
 .Rproj.user
-*.Rproj
 local/
 archived/
 .Rbuildignore
