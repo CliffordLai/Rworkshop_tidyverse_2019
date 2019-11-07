@@ -90,7 +90,8 @@ iris %>%
              colour = Species))+
   geom_point()+
   stat_smooth()+
-  coord_cartesian(xlim = c(5, 7),ylim=c(2,3))
+ # coord_cartesian(xlim = c(5, 7),ylim=c(2,3))
+ # coord_flip()
 
 ```
 
@@ -106,18 +107,19 @@ iris %>%
   labs(x="sepal length",y="sepal width")+
   theme(text = element_text(size=14),
         legend.position="bottom",
-        axis.text.x = element_text(angle = -10) )
+        axis.text.x = element_text(angle = -30) )
 ```
 
 ### data + mapping + geom + stats + facet
 
 ```{r}
 iris %>% 
+  mutate(exam=rbinom(150,1,0.5)) %>%
   ggplot(aes(x=Sepal.Length, y=Sepal.Width))+
   geom_point()+
   stat_smooth()+
 #  facet_grid(~Species)+
-  facet_grid(Species~.)+
+  facet_grid(exam~Species)+
   ggtitle("Width vs Length (Sepal)")+
   labs(x="sepal length",y="sepal width")+
   theme_bw()
@@ -138,7 +140,7 @@ p1 <- iris %>%
         axis.text.x = element_text(angle = -10) )
 
 p1
-#ggsave(p1,filename = "p1.png",width = 7,height=5)
+ggsave(p1,filename = "p1.png",width = 7,height=5)
 
 ```
 
@@ -172,7 +174,7 @@ iris %>%
 ```{r}
 iris %>% 
   ggplot(aes(x=Sepal.Width,
-             fill=Species,color=Species))+
+             fill=Species))+
   geom_density(alpha=0.1)
 ```
 

@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 
 ## Load tidyverse
 
-```{r cars}
+```{r}
 library(tidyverse)
 ```
 
@@ -34,6 +34,7 @@ iris %>% View()
 
 iris # lengthy output
 iris %>% as_tibble() #tibble, simple Data Frames
+
 iris %>%
   as_tibble() %>%
   print(n=15)
@@ -75,6 +76,7 @@ iris %>% select(contains('Len'))
 iris %>% select_if(is.numeric)
 
 # A problem occur if one directly apply a function to tibble
+mean(iris[,1])
 mean(as.data.frame(iris)[,1])
 
 iris %>%
@@ -84,7 +86,11 @@ iris %>%
 iris$Sepal.Length %>% mean()
 
 # Extract a column as a vector with pull
-iris %>% pull(Sepal.Length) %>% mean() 
+iris %>% pull(Sepal.Length) %>% mean()
+iris %>% 
+  pull(1) %>% 
+  mean()
+
 
 # Or use summarize
 iris %>%
@@ -105,7 +111,7 @@ irisSub1 <- iris %>%
 
 # Keep rows by one condition
 iris %>%
-  filter(Species=="virginica") 
+  filter(Species == "virginica") 
 
 # Keep rows by two conditions
 iris %>%
@@ -187,22 +193,23 @@ iris %>%
 
 # Count the missing values
 iris %>%
-  summarize_all( ~list(sum(is.na(.))/n()))
+  summarize_all( ~(sum(is.na(.))/n()) )
 
-# ~list() is called Lambda/Anonymous function
-# ~list(sum(is.na(.))/n()) is equivalent to
+# ~ is called Lambda/Anonymous function
+# ~(sum(is.na(.))/n()) is equivalent to
 # function(x){sum(is.na(x)/length(x))}
 iris %>%
   summarize_all( function(x){sum(is.na(x)/length(x))} )
 
 # Gather columns into key-value pairs
 iris %>%
-  summarize_all( ~list(sum(is.na(.))/n())) %>%
+  summarize_all( ~(sum(is.na(.))/n())) %>%
   gather(key = "variable",value="missingRate")
 
 # Count the unique values for each column
 iris %>%
-  summarize_all(n_distinct)
+  summarize_all(n_distinct)%>%
+  gather(key = "variable",value="uniqueValue")
 
 ```
 
@@ -218,7 +225,7 @@ iris %>%
 
 iris %>%
   mutate(m1=mean(Sepal.Length),
-            v1=var(Sepal.Length)) %>%
+         v1=var(Sepal.Length)) %>%
   print(width=100)
 ```
 
@@ -263,7 +270,7 @@ iris %>%
 
 # Notice the group attribute still exists
 iris %>%
-  select(-Species) %>%
+ # select(-Species) %>%
   rowwise() %>%
   mutate(Sepal.Max=max(Sepal.Length,Sepal.Width),
          Petal.Max=max(Petal.Length,Petal.Width)) %>%
@@ -322,11 +329,11 @@ irisSummary <- iris %>%
          meanPW=Petal.Width)
 
 # Traditional way of renaming columns
-#names(irisSummary) <- c("Species", "meanSL", "meanSW", "meanPL", "meanPW")
+# names(irisSummary) <- c("Species", "meanSL", "meanSW", "meanPL", "meanPW")
 
 iris %>% 
   left_join(irisSummary, by="Species") %>%
-  print(n=10, width=100)
+  print(n=10, width=1000)
 ```
 
 ## Use `left_join` or `right_join` to check the overlap between two data sets
@@ -342,7 +349,7 @@ str_replace_all(c("abaab","b","cb"), "b", "c")
 str_replace_all(c("abaab","b","cb"), "[ab]", "c")
 
 # set the working directory
-# setwd("C:/Users/Hao/Dropbox/newtermphd/Term12/Rworkshop_tidyverse_2019/example/")
+setwd("C:/Users/Hao/Dropbox/newtermphd/Term12/Rworkshop_tidyverse_2019/example/")
 
 # read_csv
 morning <- read_csv("IntermediateR_2019Nov_anonymous.csv",skip = 2)
@@ -368,6 +375,7 @@ sum(morning$Email %in% afternoon$Email)
 sum(afternoon$Email %in% morning$Email)
 
 # write_csv, na option
+write_csv(iris, path = "iris_processed.csv",na = "Unknown")
 
 ```
 
