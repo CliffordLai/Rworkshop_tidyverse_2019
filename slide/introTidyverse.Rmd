@@ -619,17 +619,6 @@ See "Titanic_working.Rmd".
 ]
 
 ---
-
-# Wrap-up
-
-.median[
-- Be careful to avoid overfit! (Leakage)
-- Form of stacking: single-variable model which outputs average target.
-- Do in cross-validation manner
-- Add random noise to combat overfit
-- Suitable when a variable has many levels but each of them is not rare.
-]
----
 class: center, middle
 
 # Thank You!
