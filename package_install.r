@@ -7,6 +7,7 @@ pacman::p_load(plotly,
                cowplot,
                GGally,
                corrplot,
+               ggmap,
                scales)
 
 # pacakge_list <- c("plotly",

@@ -246,6 +246,51 @@ iris %>%
 The package `ggmap` provides a spatial visualization with ggplot2.
 The package `gganimate` enable animation generation with ggplot2.
 
+```{r}
+library(ggmap)
+# Read the base map of London
+map_london <- readRDS("map_london_full_July26.rds")
+london_lat_lon <- read_csv("Neighbourhood_lat_lon.csv")
+london_lat_lon
+
+# simulate some counts
+london_lat_lon <- london_lat_lon %>% 
+  mutate(fakepop=10+rpois(41,lambda = 1))
+
+london_lat_lon
+
+# Plot the map
+ggmap(map_london)
+
+ggmap(map_london) +
+  coord_fixed(xlim= -81.245727+c(-0.15,0.15), 
+              ylim = 42.986932+c(-0.13,0.13))
+
+# Add labels from london_lat_lon
+ggmap(map_london) +
+  coord_fixed(xlim= -81.245727+c(-0.15,0.15), 
+              ylim = 42.986932+c(-0.13,0.13))+
+  # geom_text(data = london_lat_lon, 
+  #           aes(x = lon, y = lat, label=fakepop, 
+  #               color=cut(fakepop,10)), 
+  #           size=5,fontface = "bold", 
+  #           show.legend = FALSE)+
+  geom_text(data = london_lat_lon, 
+            aes(x = lon, y = lat+0.005, 
+                label=neigh,
+                color=cut(fakepop,10)), 
+            size=3.5,  fontface = "bold", show.legend = FALSE)+
+  theme(text = element_text(color = "#444444"),
+        plot.title = element_text(size = 15, face = 'bold'),
+        plot.subtitle = element_text(size = 12),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank()
+  )
+
+```
+
+
 
 # Errors in package references
 
