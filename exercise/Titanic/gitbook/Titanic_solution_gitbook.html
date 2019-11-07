@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Exploratory Data Analysis on Titanic Surivival</title>
+  <meta name="description" content="Exploratory Data Analysis on Titanic Surivival" />
+  <meta name="generator" content="bookdown 0.14 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Exploratory Data Analysis on Titanic Surivival" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Exploratory Data Analysis on Titanic Surivival" />
+  
+  
+  
+
+<meta name="author" content="Your name" />
+
+
+<meta name="date" content="2019-11-05" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+
+
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+<script>
+/* ========================================================================
+ * Bootstrap: transition.js v3.3.7
+ * http://getbootstrap.com/javascript/#transitions
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+
++function ($) {
+  'use strict';
+
+  // CSS TRANSITION SUPPORT (Shoutout: http://www.modernizr.com/)
+  // ============================================================
+
+  function transitionEnd() {
+    var el = document.createElement('bootstrap')
+
+    var transEndEventNames = {
+      WebkitTransition : 'webkitTransitionEnd',
+      MozTransition    : 'transitionend',
+      OTransition      : 'oTransitionEnd otransitionend',
+      transition       : 'transitionend'
+    }
+
+    for (var name in transEndEventNames) {
+      if (el.style[name] !== undefined) {
+        return { end: transEndEventNames[name] }
+      }
+    }
+
+    return false // explicit for ie8 (  ._.)
+  }
+
+  // http://blog.alexmaccaw.com/css-transitions
+  $.fn.emulateTransitionEnd = function (duration) {
+    var called = false
+    var $el = this
+    $(this).one('bsTransitionEnd', function () { called = true })
+    var callback = function () { if (!called) $($el).trigger($.support.transition.end) }
+    setTimeout(callback, duration)
+    return this
+  }
+
+  $(function () {
+    $.support.transition = transitionEnd()
+
+    if (!$.support.transition) return
+
+    $.event.special.bsTransitionEnd = {
+      bindType: $.support.transition.end,
+      delegateType: $.support.transition.end,
+      handle: function (e) {
+        if ($(e.target).is(this)) return e.handleObj.handler.apply(this, arguments)
+      }
+    }
+  })
+
+}(jQuery);
+</script>
+<script>
+/* ========================================================================
+ * Bootstrap: collapse.js v3.3.7
+ * http://getbootstrap.com/javascript/#collapse
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+/* jshint latedef: false */
+
++function ($) {
+  'use strict';
+
+  // COLLAPSE PUBLIC CLASS DEFINITION
+  // ================================
+
+  var Collapse = function (element, options) {
+    this.$element      = $(element)
+    this.options       = $.extend({}, Collapse.DEFAULTS, options)
+    this.$trigger      = $('[data-toggle="collapse"][href="#' + element.id + '"],' +
+                           '[data-toggle="collapse"][data-target="#' + element.id + '"]')
+    this.transitioning = null
+
+    if (this.options.parent) {
+      this.$parent = this.getParent()
+    } else {
+      this.addAriaAndCollapsedClass(this.$element, this.$trigger)
+    }
+
+    if (this.options.toggle) this.toggle()
+  }
+
+  Collapse.VERSION  = '3.3.7'
+
+  Collapse.TRANSITION_DURATION = 350
+
+  Collapse.DEFAULTS = {
+    toggle: true
+  }
+
+  Collapse.prototype.dimension = function () {
+    var hasWidth = this.$element.hasClass('width')
+    return hasWidth ? 'width' : 'height'
+  }
+
+  Collapse.prototype.show = function () {
+    if (this.transitioning || this.$element.hasClass('in')) return
+
+    var activesData
+    var actives = this.$parent && this.$parent.children('.panel').children('.in, .collapsing')
+
+    if (actives && actives.length) {
+      activesData = actives.data('bs.collapse')
+      if (activesData && activesData.transitioning) return
+    }
+
+    var startEvent = $.Event('show.bs.collapse')
+    this.$element.trigger(startEvent)
+    if (startEvent.isDefaultPrevented()) return
+
+    if (actives && actives.length) {
+      Plugin.call(actives, 'hide')
+      activesData || actives.data('bs.collapse', null)
+    }
+
+    var dimension = this.dimension()
+
+    this.$element
+      .removeClass('collapse')
+      .addClass('collapsing')[dimension](0)
+      .attr('aria-expanded', true)
+
+    this.$trigger
+      .removeClass('collapsed')
+      .attr('aria-expanded', true)
+
+    this.transitioning = 1
+
+    var complete = function () {
+      this.$element
+        .removeClass('collapsing')
+        .addClass('collapse in')[dimension]('')
+      this.transitioning = 0
+      this.$element
+        .trigger('shown.bs.collapse')
+    }
+
+    if (!$.support.transition) return complete.call(this)
+
+    var scrollSize = $.camelCase(['scroll', dimension].join('-'))
+
+    this.$element
+      .one('bsTransitionEnd', $.proxy(complete, this))
+      .emulateTransitionEnd(Collapse.TRANSITION_DURATION)[dimension](this.$element[0][scrollSize])
+  }
+
+  Collapse.prototype.hide = function () {
+    if (this.transitioning || !this.$element.hasClass('in')) return
+
+    var startEvent = $.Event('hide.bs.collapse')
+    this.$element.trigger(startEvent)
+    if (startEvent.isDefaultPrevented()) return
+
+    var dimension = this.dimension()
+
+    this.$element[dimension](this.$element[dimension]())[0].offsetHeight
+
+    this.$element
+      .addClass('collapsing')
+      .removeClass('collapse in')
+      .attr('aria-expanded', false)
+
+    this.$trigger
+      .addClass('collapsed')
+      .attr('aria-expanded', false)
+
+    this.transitioning = 1
+
+    var complete = function () {
+      this.transitioning = 0
+      this.$element
+        .removeClass('collapsing')
+        .addClass('collapse')
+        .trigger('hidden.bs.collapse')
+    }
+
+    if (!$.support.transition) return complete.call(this)
+
+    this.$element
+      [dimension](0)
+      .one('bsTransitionEnd', $.proxy(complete, this))
+      .emulateTransitionEnd(Collapse.TRANSITION_DURATION)
+  }
+
+  Collapse.prototype.toggle = function () {
+    this[this.$element.hasClass('in') ? 'hide' : 'show']()
+  }
+
+  Collapse.prototype.getParent = function () {
+    return $(this.options.parent)
+      .find('[data-toggle="collapse"][data-parent="' + this.options.parent + '"]')
+      .each($.proxy(function (i, element) {
+        var $element = $(element)
+        this.addAriaAndCollapsedClass(getTargetFromTrigger($element), $element)
+      }, this))
+      .end()
+  }
+
+  Collapse.prototype.addAriaAndCollapsedClass = function ($element, $trigger) {
+    var isOpen = $element.hasClass('in')
+
+    $element.attr('aria-expanded', isOpen)
+    $trigger
+      .toggleClass('collapsed', !isOpen)
+      .attr('aria-expanded', isOpen)
+  }
+
+  function getTargetFromTrigger($trigger) {
+    var href
+    var target = $trigger.attr('data-target')
+      || (href = $trigger.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '') // strip for ie7
+
+    return $(target)
+  }
+
+
+  // COLLAPSE PLUGIN DEFINITION
+  // ==========================
+
+  function Plugin(option) {
+    return this.each(function () {
+      var $this   = $(this)
+      var data    = $this.data('bs.collapse')
+      var options = $.extend({}, Collapse.DEFAULTS, $this.data(), typeof option == 'object' && option)
+
+      if (!data && options.toggle && /show|hide/.test(option)) options.toggle = false
+      if (!data) $this.data('bs.collapse', (data = new Collapse(this, options)))
+      if (typeof option == 'string') data[option]()
+    })
+  }
+
+  var old = $.fn.collapse
+
+  $.fn.collapse             = Plugin
+  $.fn.collapse.Constructor = Collapse
+
+
+  // COLLAPSE NO CONFLICT
+  // ====================
+
+  $.fn.collapse.noConflict = function () {
+    $.fn.collapse = old
+    return this
+  }
+
+
+  // COLLAPSE DATA-API
+  // =================
+
+  $(document).on('click.bs.collapse.data-api', '[data-toggle="collapse"]', function (e) {
+    var $this   = $(this)
+
+    if (!$this.attr('data-target')) e.preventDefault()
+
+    var $target = getTargetFromTrigger($this)
+    var data    = $target.data('bs.collapse')
+    var option  = data ? 'toggle' : $this.data()
+
+    Plugin.call($target, option)
+  })
+
+}(jQuery);
+</script>
+<script>
+window.initializeCodeFolding = function(show) {
+
+  // handlers for show-all and hide all
+  $("#rmd-show-all-code").click(function() {
+    $('div.r-code-collapse').each(function() {
+      $(this).collapse('show');
+    });
+  });
+  $("#rmd-hide-all-code").click(function() {
+    $('div.r-code-collapse').each(function() {
+      $(this).collapse('hide');
+    });
+  });
+
+  // index for unique code element ids
+  var currentIndex = 1;
+
+  // select all R code blocks
+  var rCodeBlocks = $('pre.sourceCode, pre.r, pre.python, pre.bash, pre.sql, pre.cpp, pre.stan, pre.js, pre.html');
+  rCodeBlocks.each(function() {
+
+    // create a collapsable div to wrap the code in
+    var div = $('<div class="collapse r-code-collapse"></div>');
+    if (show)
+      div.addClass('in');
+    var id = 'rcode-643E0F36' + currentIndex++;
+    div.attr('id', id);
+    $(this).before(div);
+    $(this).detach().appendTo(div);
+
+    // add a show code button right above
+    var showCodeText = $('<span>' + (show ? 'Hide' : 'Code') + '</span>');
+    var showCodeButton = $('<button type="button" class="btn btn-default btn-xs code-folding-btn pull-right"></button>');
+    showCodeButton.append(showCodeText);
+    showCodeButton
+        .attr('data-toggle', 'collapse')
+        .attr('data-target', '#' + id)
+        .attr('aria-expanded', show)
+        .attr('aria-controls', id);
+
+    var buttonRow = $('<div class="row"></div>');
+    var buttonCol = $('<div class="col-md-12"></div>');
+
+    buttonCol.append(showCodeButton);
+    buttonRow.append(buttonCol);
+
+    div.before(buttonRow);
+
+    // update state of button on show/hide
+    div.on('hidden.bs.collapse', function () {
+      showCodeText.text('Code');
+    });
+    div.on('show.bs.collapse', function () {
+      showCodeText.text('Hide');
+    });
+  });
+
+}
+</script>
+<script>
+/* ========================================================================
+ * Bootstrap: dropdown.js v3.3.7
+ * http://getbootstrap.com/javascript/#dropdowns
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+
++function ($) {
+  'use strict';
+
+  // DROPDOWN CLASS DEFINITION
+  // =========================
+
+  var backdrop = '.dropdown-backdrop'
+  var toggle   = '[data-toggle="dropdown"]'
+  var Dropdown = function (element) {
+    $(element).on('click.bs.dropdown', this.toggle)
+  }
+
+  Dropdown.VERSION = '3.3.7'
+
+  function getParent($this) {
+    var selector = $this.attr('data-target')
+
+    if (!selector) {
+      selector = $this.attr('href')
+      selector = selector && /#[A-Za-z]/.test(selector) && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
+    }
+
+    var $parent = selector && $(selector)
+
+    return $parent && $parent.length ? $parent : $this.parent()
+  }
+
+  function clearMenus(e) {
+    if (e && e.which === 3) return
+    $(backdrop).remove()
+    $(toggle).each(function () {
+      var $this         = $(this)
+      var $parent       = getParent($this)
+      var relatedTarget = { relatedTarget: this }
+
+      if (!$parent.hasClass('open')) return
+
+      if (e && e.type == 'click' && /input|textarea/i.test(e.target.tagName) && $.contains($parent[0], e.target)) return
+
+      $parent.trigger(e = $.Event('hide.bs.dropdown', relatedTarget))
+
+      if (e.isDefaultPrevented()) return
+
+      $this.attr('aria-expanded', 'false')
+      $parent.removeClass('open').trigger($.Event('hidden.bs.dropdown', relatedTarget))
+    })
+  }
+
+  Dropdown.prototype.toggle = function (e) {
+    var $this = $(this)
+
+    if ($this.is('.disabled, :disabled')) return
+
+    var $parent  = getParent($this)
+    var isActive = $parent.hasClass('open')
+
+    clearMenus()
+
+    if (!isActive) {
+      if ('ontouchstart' in document.documentElement && !$parent.closest('.navbar-nav').length) {
+        // if mobile we use a backdrop because click events don't delegate
+        $(document.createElement('div'))
+          .addClass('dropdown-backdrop')
+          .insertAfter($(this))
+          .on('click', clearMenus)
+      }
+
+      var relatedTarget = { relatedTarget: this }
+      $parent.trigger(e = $.Event('show.bs.dropdown', relatedTarget))
+
+      if (e.isDefaultPrevented()) return
+
+      $this
+        .trigger('focus')
+        .attr('aria-expanded', 'true')
+
+      $parent
+        .toggleClass('open')
+        .trigger($.Event('shown.bs.dropdown', relatedTarget))
+    }
+
+    return false
+  }
+
+  Dropdown.prototype.keydown = function (e) {
+    if (!/(38|40|27|32)/.test(e.which) || /input|textarea/i.test(e.target.tagName)) return
+
+    var $this = $(this)
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    if ($this.is('.disabled, :disabled')) return
+
+    var $parent  = getParent($this)
+    var isActive = $parent.hasClass('open')
+
+    if (!isActive && e.which != 27 || isActive && e.which == 27) {
+      if (e.which == 27) $parent.find(toggle).trigger('focus')
+      return $this.trigger('click')
+    }
+
+    var desc = ' li:not(.disabled):visible a'
+    var $items = $parent.find('.dropdown-menu' + desc)
+
+    if (!$items.length) return
+
+    var index = $items.index(e.target)
+
+    if (e.which == 38 && index > 0)                 index--         // up
+    if (e.which == 40 && index < $items.length - 1) index++         // down
+    if (!~index)                                    index = 0
+
+    $items.eq(index).trigger('focus')
+  }
+
+
+  // DROPDOWN PLUGIN DEFINITION
+  // ==========================
+
+  function Plugin(option) {
+    return this.each(function () {
+      var $this = $(this)
+      var data  = $this.data('bs.dropdown')
+
+      if (!data) $this.data('bs.dropdown', (data = new Dropdown(this)))
+      if (typeof option == 'string') data[option].call($this)
+    })
+  }
+
+  var old = $.fn.dropdown
+
+  $.fn.dropdown             = Plugin
+  $.fn.dropdown.Constructor = Dropdown
+
+
+  // DROPDOWN NO CONFLICT
+  // ====================
+
+  $.fn.dropdown.noConflict = function () {
+    $.fn.dropdown = old
+    return this
+  }
+
+
+  // APPLY TO STANDARD DROPDOWN ELEMENTS
+  // ===================================
+
+  $(document)
+    .on('click.bs.dropdown.data-api', clearMenus)
+    .on('click.bs.dropdown.data-api', '.dropdown form', function (e) { e.stopPropagation() })
+    .on('click.bs.dropdown.data-api', toggle, Dropdown.prototype.toggle)
+    .on('keydown.bs.dropdown.data-api', toggle, Dropdown.prototype.keydown)
+    .on('keydown.bs.dropdown.data-api', '.dropdown-menu', Dropdown.prototype.keydown)
+
+}(jQuery);
+</script>
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+.row { display: flex; }
+.collapse { display: none; }
+.in { display:block }
+.pull-right > .dropdown-menu {
+    right: 0;
+    left: auto;
+}
+.open > .dropdown-menu {
+    display: block;
+}
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+}
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("show" === "hide");
+});
+</script>
+
+
+<script>
+document.write('<div class="btn-group pull-right" style="position: absolute; top: 20%; right: 2%; z-index: 200"><button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" data-_extension-text-contrast=""><span>Code</span> <span class="caret"></span></button><ul class="dropdown-menu" style="min-width: 50px;"><li><a id="rmd-show-all-code" href="#">Show All Code</a></li><li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li></ul></div>')
+</script>
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="1" data-path=""><a href="#preparations"><i class="fa fa-check"></i><b>1</b> Preparations</a><ul>
+<li class="chapter" data-level="1.1" data-path=""><a href="#load-libraries"><i class="fa fa-check"></i><b>1.1</b> Load libraries</a></li>
+<li class="chapter" data-level="1.2" data-path=""><a href="#read-data"><i class="fa fa-check"></i><b>1.2</b> Read data</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path=""><a href="#glance-at-data"><i class="fa fa-check"></i><b>2</b> Glance at data</a><ul>
+<li class="chapter" data-level="2.1" data-path=""><a href="#data-structure"><i class="fa fa-check"></i><b>2.1</b> Data structure</a></li>
+<li class="chapter" data-level="2.2" data-path=""><a href="#number-of-distinct-values-for-each-variable"><i class="fa fa-check"></i><b>2.2</b> Number of distinct values for each variable</a></li>
+<li class="chapter" data-level="2.3" data-path=""><a href="#missing-rate-for-each-variable"><i class="fa fa-check"></i><b>2.3</b> Missing rate for each variable</a></li>
+<li class="chapter" data-level="2.4" data-path=""><a href="#create-a-variable-survivedlabel-as-a-factor-of-survival"><i class="fa fa-check"></i><b>2.4</b> Create a variable SurvivedLabel as a factor of Survival</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path=""><a href="#survival-for-each-variable"><i class="fa fa-check"></i><b>3</b> Survival for each variable</a><ul>
+<li class="chapter" data-level="3.1" data-path=""><a href="#overall"><i class="fa fa-check"></i><b>3.1</b> Overall</a></li>
+<li class="chapter" data-level="3.2" data-path=""><a href="#pclass"><i class="fa fa-check"></i><b>3.2</b> Pclass</a></li>
+<li class="chapter" data-level="3.3" data-path=""><a href="#sex"><i class="fa fa-check"></i><b>3.3</b> Sex</a></li>
+<li class="chapter" data-level="3.4" data-path=""><a href="#age"><i class="fa fa-check"></i><b>3.4</b> Age</a></li>
+<li class="chapter" data-level="3.5" data-path=""><a href="#sibsp"><i class="fa fa-check"></i><b>3.5</b> SibSp</a></li>
+<li class="chapter" data-level="3.6" data-path=""><a href="#parch"><i class="fa fa-check"></i><b>3.6</b> Parch</a></li>
+<li class="chapter" data-level="3.7" data-path=""><a href="#fare"><i class="fa fa-check"></i><b>3.7</b> Fare</a></li>
+<li class="chapter" data-level="3.8" data-path=""><a href="#embarked"><i class="fa fa-check"></i><b>3.8</b> Embarked</a></li>
+<li class="chapter" data-level="3.9" data-path=""><a href="#sex-and-pclass"><i class="fa fa-check"></i><b>3.9</b> Sex and Pclass</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path=""><a href="#others"><i class="fa fa-check"></i><b>4</b> Others</a><ul>
+<li class="chapter" data-level="4.1" data-path=""><a href="#correlation"><i class="fa fa-check"></i><b>4.1</b> Correlation</a></li>
+<li class="chapter" data-level="4.2" data-path=""><a href="#pairwise-plot"><i class="fa fa-check"></i><b>4.2</b> Pairwise plot</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path=""><a href="#feature-engineering-on-the-titanicing-set"><i class="fa fa-check"></i><b>5</b> Feature Engineering on the titanicing Set</a><ul>
+<li class="chapter" data-level="5.1" data-path=""><a href="#discretize-age"><i class="fa fa-check"></i><b>5.1</b> Discretize Age</a></li>
+<li class="chapter" data-level="5.2" data-path=""><a href="#discretize-fare"><i class="fa fa-check"></i><b>5.2</b> Discretize Fare</a></li>
+<li class="chapter" data-level="5.3" data-path=""><a href="#family-size"><i class="fa fa-check"></i><b>5.3</b> Family size</a></li>
+<li class="chapter" data-level="5.4" data-path=""><a href="#single"><i class="fa fa-check"></i><b>5.4</b> Single</a></li>
+<li class="chapter" data-level="5.5" data-path=""><a href="#tickets"><i class="fa fa-check"></i><b>5.5</b> Tickets</a></li>
+<li class="chapter" data-level="5.6" data-path=""><a href="#target-encoding"><i class="fa fa-check"></i><b>5.6</b> Target encoding</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path=""><a href="#predict-survival-rate"><i class="fa fa-check"></i><b>6</b> Predict Survival Rate</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Exploratory Data Analysis on Titanic Surivival</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="header">
+<h1 class="title">Exploratory Data Analysis on Titanic Surivival</h1>
+<p class="author"><em>Your name</em></p>
+<p class="date"><em>2019-11-05</em></p>
+</div>
+<div id="preparations" class="section level1 tabset tabset-fade">
+<h1><span class="header-section-number">1</span> Preparations</h1>
+<div id="load-libraries" class="section level2">
+<h2><span class="header-section-number">1.1</span> Load libraries</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(tidyverse)</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw">library</span>(scales)</a>
+<a class="sourceLine" id="cb1-3" title="3"><span class="kw">setwd</span>(<span class="st">&quot;C:/Users/Yi/Dropbox/newtermphd/Term12/Rworkshop_data_manipulation/exercise/Titanic/gitbook/&quot;</span>) </a></code></pre></div>
+</div>
+<div id="read-data" class="section level2">
+<h2><span class="header-section-number">1.2</span> Read data</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1">titanic &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">&quot;titanic.csv&quot;</span>)</a></code></pre></div>
+<pre><code>## Parsed with column specification:
+## cols(
+##   PassengerId = col_double(),
+##   Survived = col_double(),
+##   Pclass = col_double(),
+##   Name = col_character(),
+##   Sex = col_character(),
+##   Age = col_double(),
+##   SibSp = col_double(),
+##   Parch = col_double(),
+##   Ticket = col_character(),
+##   Fare = col_double(),
+##   Cabin = col_character(),
+##   Embarked = col_character()
+## )</code></pre>
+</div>
+</div>
+<div id="glance-at-data" class="section level1 tabset tabset-fade">
+<h1><span class="header-section-number">2</span> Glance at data</h1>
+<div id="data-structure" class="section level2">
+<h2><span class="header-section-number">2.1</span> Data structure</h2>
+<pre><code>## # A tibble: 891 x 12
+##    PassengerId Survived Pclass Name  Sex     Age SibSp Parch Ticket  Fare
+##          &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;
+##  1           1        0      3 Brau~ male     22     1     0 A/5 2~  7.25
+##  2           2        1      1 Cumi~ fema~    38     1     0 PC 17~ 71.3 
+##  3           3        1      3 Heik~ fema~    26     0     0 STON/~  7.92
+##  4           4        1      1 Futr~ fema~    35     1     0 113803 53.1 
+##  5           5        0      3 Alle~ male     35     0     0 373450  8.05
+##  6           6        0      3 Mora~ male     NA     0     0 330877  8.46
+##  7           7        0      1 McCa~ male     54     0     0 17463  51.9 
+##  8           8        0      3 Pals~ male      2     3     1 349909 21.1 
+##  9           9        1      3 John~ fema~    27     0     2 347742 11.1 
+## 10          10        1      2 Nass~ fema~    14     1     0 237736 30.1 
+## # ... with 881 more rows, and 2 more variables: Cabin &lt;chr&gt;,
+## #   Embarked &lt;chr&gt;</code></pre>
+<pre><code>## Observations: 891
+## Variables: 12
+## $ PassengerId &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,...
+## $ Survived    &lt;dbl&gt; 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0,...
+## $ Pclass      &lt;dbl&gt; 3, 1, 3, 1, 3, 3, 1, 3, 3, 2, 3, 1, 3, 3, 3, 2, 3,...
+## $ Name        &lt;chr&gt; &quot;Braund, Mr. Owen Harris&quot;, &quot;Cumings, Mrs. John Bra...
+## $ Sex         &lt;chr&gt; &quot;male&quot;, &quot;female&quot;, &quot;female&quot;, &quot;female&quot;, &quot;male&quot;, &quot;mal...
+## $ Age         &lt;dbl&gt; 22, 38, 26, 35, 35, NA, 54, 2, 27, 14, 4, 58, 20, ...
+## $ SibSp       &lt;dbl&gt; 1, 1, 0, 1, 0, 0, 0, 3, 0, 1, 1, 0, 0, 1, 0, 0, 4,...
+## $ Parch       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 1, 0, 0, 5, 0, 0, 1,...
+## $ Ticket      &lt;chr&gt; &quot;A/5 21171&quot;, &quot;PC 17599&quot;, &quot;STON/O2. 3101282&quot;, &quot;1138...
+## $ Fare        &lt;dbl&gt; 7.2500, 71.2833, 7.9250, 53.1000, 8.0500, 8.4583, ...
+## $ Cabin       &lt;chr&gt; NA, &quot;C85&quot;, NA, &quot;C123&quot;, NA, NA, &quot;E46&quot;, NA, NA, NA, ...
+## $ Embarked    &lt;chr&gt; &quot;S&quot;, &quot;C&quot;, &quot;S&quot;, &quot;S&quot;, &quot;S&quot;, &quot;Q&quot;, &quot;S&quot;, &quot;S&quot;, &quot;S&quot;, &quot;C&quot;, ...</code></pre>
+</div>
+<div id="number-of-distinct-values-for-each-variable" class="section level2">
+<h2><span class="header-section-number">2.2</span> Number of distinct values for each variable</h2>
+<p>Make use of <code>n_distinct</code></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="co"># Count by summarize_all</span></a>
+<a class="sourceLine" id="cb6-2" title="2">titanic <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="st">  </span><span class="kw">summarize_all</span>(n_distinct) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="st">  </span><span class="kw">gather</span>(<span class="dt">key =</span> <span class="st">&quot;variable&quot;</span>,<span class="dt">value=</span><span class="st">&quot;Unique&quot;</span>)</a></code></pre></div>
+<pre><code>## # A tibble: 12 x 2
+##    variable    Unique
+##    &lt;chr&gt;        &lt;int&gt;
+##  1 PassengerId    891
+##  2 Survived         2
+##  3 Pclass           3
+##  4 Name           891
+##  5 Sex              2
+##  6 Age             89
+##  7 SibSp            7
+##  8 Parch            7
+##  9 Ticket         681
+## 10 Fare           248
+## 11 Cabin          148
+## 12 Embarked         4</code></pre>
+</div>
+<div id="missing-rate-for-each-variable" class="section level2">
+<h2><span class="header-section-number">2.3</span> Missing rate for each variable</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="co"># Count by summarize_all</span></a>
+<a class="sourceLine" id="cb8-2" title="2">titanic <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="st">  </span><span class="kw">summarize_all</span>(<span class="kw">list</span>(<span class="op">~</span><span class="kw">sum</span>(<span class="kw">is.na</span>(.))<span class="op">/</span><span class="kw">n</span>())) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb8-4" title="4"><span class="st">  </span><span class="kw">gather</span>(<span class="dt">key =</span> <span class="st">&quot;variable&quot;</span>,<span class="dt">value=</span><span class="st">&quot;missingRate&quot;</span>)</a></code></pre></div>
+<pre><code>## # A tibble: 12 x 2
+##    variable    missingRate
+##    &lt;chr&gt;             &lt;dbl&gt;
+##  1 PassengerId     0      
+##  2 Survived        0      
+##  3 Pclass          0      
+##  4 Name            0      
+##  5 Sex             0      
+##  6 Age             0.199  
+##  7 SibSp           0      
+##  8 Parch           0      
+##  9 Ticket          0      
+## 10 Fare            0      
+## 11 Cabin           0.771  
+## 12 Embarked        0.00224</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="co"># Create a bar chart to display it</span></a>
+<a class="sourceLine" id="cb10-2" title="2">titanic <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb10-3" title="3"><span class="st">  </span><span class="kw">summarize_all</span>(<span class="kw">list</span>(<span class="op">~</span><span class="kw">sum</span>(<span class="kw">is.na</span>(.))<span class="op">/</span><span class="kw">n</span>())) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb10-4" title="4"><span class="st">  </span><span class="kw">gather</span>(<span class="dt">key =</span> <span class="st">&quot;variable&quot;</span>,<span class="dt">value=</span><span class="st">&quot;missingRate&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb10-5" title="5"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(variable,missingRate))<span class="op">+</span></a>
+<a class="sourceLine" id="cb10-6" title="6"><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>,<span class="dt">fill=</span><span class="st">&quot;red&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb10-7" title="7"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="create-a-variable-survivedlabel-as-a-factor-of-survival" class="section level2">
+<h2><span class="header-section-number">2.4</span> Create a variable SurvivedLabel as a factor of Survival</h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">titanic</a></code></pre></div>
+<pre><code>## # A tibble: 891 x 12
+##    PassengerId Survived Pclass Name  Sex     Age SibSp Parch Ticket  Fare
+##          &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;
+##  1           1        0      3 Brau~ male     22     1     0 A/5 2~  7.25
+##  2           2        1      1 Cumi~ fema~    38     1     0 PC 17~ 71.3 
+##  3           3        1      3 Heik~ fema~    26     0     0 STON/~  7.92
+##  4           4        1      1 Futr~ fema~    35     1     0 113803 53.1 
+##  5           5        0      3 Alle~ male     35     0     0 373450  8.05
+##  6           6        0      3 Mora~ male     NA     0     0 330877  8.46
+##  7           7        0      1 McCa~ male     54     0     0 17463  51.9 
+##  8           8        0      3 Pals~ male      2     3     1 349909 21.1 
+##  9           9        1      3 John~ fema~    27     0     2 347742 11.1 
+## 10          10        1      2 Nass~ fema~    14     1     0 237736 30.1 
+## # ... with 881 more rows, and 2 more variables: Cabin &lt;chr&gt;,
+## #   Embarked &lt;chr&gt;</code></pre>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="co"># Create a variable SurvivedLabel as a factor of Survival</span></a>
+<a class="sourceLine" id="cb13-2" title="2">titanic &lt;-<span class="st"> </span>titanic <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb13-3" title="3"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">SurvivedLabel=</span><span class="kw">factor</span>(Survived))</a></code></pre></div>
+</div>
+</div>
+<div id="survival-for-each-variable" class="section level1 tabset tabset-fade">
+<h1><span class="header-section-number">3</span> Survival for each variable</h1>
+<div id="overall" class="section level2">
+<h2><span class="header-section-number">3.1</span> Overall</h2>
+<p>Count the number and proportion of survived passengers.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="co"># Step 1: group_by SurvivedLabel</span></a>
+<a class="sourceLine" id="cb14-2" title="2"><span class="co"># Step 2: summarise count using count=n()</span></a>
+<a class="sourceLine" id="cb14-3" title="3"><span class="co"># Step 3: mutate to find the proportion, count/sum(count)</span></a>
+<a class="sourceLine" id="cb14-4" title="4">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb14-5" title="5"><span class="st">  </span><span class="kw">group_by</span>(SurvivedLabel) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb14-6" title="6"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">count=</span><span class="kw">n</span>()) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb14-7" title="7"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">prop=</span>count<span class="op">/</span><span class="kw">sum</span>(count))</a></code></pre></div>
+<pre><code>## # A tibble: 2 x 3
+##   SurvivedLabel count  prop
+##   &lt;fct&gt;         &lt;int&gt; &lt;dbl&gt;
+## 1 0               549 0.616
+## 2 1               342 0.384</code></pre>
+</div>
+<div id="pclass" class="section level2">
+<h2><span class="header-section-number">3.2</span> Pclass</h2>
+<p>Ticket class.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="co"># Use summarise and n() to count each Pclass</span></a>
+<a class="sourceLine" id="cb16-2" title="2"><span class="co"># as well as mean() to compute the survival rate</span></a>
+<a class="sourceLine" id="cb16-3" title="3"><span class="co"># Step 1: group_by</span></a>
+<a class="sourceLine" id="cb16-4" title="4"><span class="co"># Step 2: summarise</span></a>
+<a class="sourceLine" id="cb16-5" title="5">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb16-6" title="6"><span class="st">  </span><span class="kw">group_by</span>(Pclass) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb16-7" title="7"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived), </a>
+<a class="sourceLine" id="cb16-8" title="8">            <span class="dt">count=</span><span class="kw">n</span>())</a></code></pre></div>
+<pre><code>## # A tibble: 3 x 3
+##   Pclass   sur count
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+## 1      1 0.630   216
+## 2      2 0.473   184
+## 3      3 0.242   491</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1"><span class="co"># Bar chart for the surival rate</span></a>
+<a class="sourceLine" id="cb18-2" title="2">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb18-3" title="3"><span class="st">  </span><span class="kw">group_by</span>(Pclass) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb18-4" title="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb18-5" title="5"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(Pclass,sur)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb18-6" title="6"><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb18-7" title="7"><span class="st">  </span><span class="kw">geom_text</span>(<span class="kw">aes</span>(<span class="dt">label=</span>scales<span class="op">::</span><span class="kw">percent</span>(sur,</a>
+<a class="sourceLine" id="cb18-8" title="8">                                      <span class="dt">accuracy=</span><span class="fl">0.1</span>,</a>
+<a class="sourceLine" id="cb18-9" title="9">                                      <span class="dt">suffix=</span><span class="st">&quot;%&quot;</span>) ),  </a>
+<a class="sourceLine" id="cb18-10" title="10">            <span class="dt">size=</span><span class="fl">3.5</span>,<span class="dt">vjust=</span><span class="op">-</span><span class="fl">0.25</span>,</a>
+<a class="sourceLine" id="cb18-11" title="11">            <span class="dt">position =</span> <span class="kw">position_dodge</span>(<span class="dt">width =</span> <span class="fl">0.9</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb18-12" title="12"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> scales<span class="op">::</span>percent, <span class="dt">limits =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb18-13" title="13"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">y=</span><span class="st">&quot;Survival Rate&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb18-14" title="14"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="sex" class="section level2">
+<h2><span class="header-section-number">3.3</span> Sex</h2>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1"><span class="co"># Use summarise and n() to count each Sex</span></a>
+<a class="sourceLine" id="cb19-2" title="2"><span class="co"># as well as mean() to compute the survival rate</span></a>
+<a class="sourceLine" id="cb19-3" title="3"><span class="co"># Step 1: group_by</span></a>
+<a class="sourceLine" id="cb19-4" title="4"><span class="co"># Step 2: summarise</span></a>
+<a class="sourceLine" id="cb19-5" title="5">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb19-6" title="6"><span class="st">  </span><span class="kw">group_by</span>(Sex) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb19-7" title="7"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived), </a>
+<a class="sourceLine" id="cb19-8" title="8">            <span class="dt">count=</span><span class="kw">n</span>())</a></code></pre></div>
+<pre><code>## # A tibble: 2 x 3
+##   Sex      sur count
+##   &lt;chr&gt;  &lt;dbl&gt; &lt;int&gt;
+## 1 female 0.742   314
+## 2 male   0.189   577</code></pre>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1"><span class="co"># Bar chart for the surival rate</span></a>
+<a class="sourceLine" id="cb21-2" title="2">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb21-3" title="3"><span class="st">  </span><span class="kw">group_by</span>(Sex) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb21-4" title="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb21-5" title="5"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(Sex,sur)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb21-6" title="6"><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb21-7" title="7"><span class="st">  </span><span class="kw">geom_text</span>(<span class="kw">aes</span>(<span class="dt">label=</span>scales<span class="op">::</span><span class="kw">percent</span>(sur,</a>
+<a class="sourceLine" id="cb21-8" title="8">                                      <span class="dt">accuracy=</span><span class="fl">0.1</span>,</a>
+<a class="sourceLine" id="cb21-9" title="9">                                      <span class="dt">suffix=</span><span class="st">&quot;%&quot;</span>) ),  </a>
+<a class="sourceLine" id="cb21-10" title="10">            <span class="dt">size=</span><span class="fl">3.5</span>,<span class="dt">vjust=</span><span class="op">-</span><span class="fl">0.25</span>,</a>
+<a class="sourceLine" id="cb21-11" title="11">            <span class="dt">position =</span> <span class="kw">position_dodge</span>(<span class="dt">width =</span> <span class="fl">0.9</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb21-12" title="12"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> scales<span class="op">::</span>percent, <span class="dt">limits =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb21-13" title="13"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">y=</span><span class="st">&quot;Survival Rate&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb21-14" title="14"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="age" class="section level2">
+<h2><span class="header-section-number">3.4</span> Age</h2>
+<p>Use <code>SurvivedLabel</code> as a group indicator in boxplot.
+Notice that there are many missing values.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1"><span class="co"># Create a histogram of Age</span></a>
+<a class="sourceLine" id="cb22-2" title="2">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb22-3" title="3"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x=</span>Age))<span class="op">+</span></a>
+<a class="sourceLine" id="cb22-4" title="4"><span class="st">  </span><span class="kw">geom_histogram</span>()</a></code></pre></div>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1"><span class="co"># Boxplot between SurvivedLabel and Age</span></a>
+<a class="sourceLine" id="cb24-2" title="2">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb24-3" title="3"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(SurvivedLabel,Age)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb24-4" title="4"><span class="st">  </span><span class="kw">geom_boxplot</span>()</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-8-2.png" width="672" /></p>
+</div>
+<div id="sibsp" class="section level2">
+<h2><span class="header-section-number">3.5</span> SibSp</h2>
+<p>Number of siblings / spouses aboard the Titanic.
+The survival rate within each group indicate that
+the survival rate drops for people with higher SibSp except for people who had no siblings.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" title="1"><span class="co"># Use summarise and n() to count each SibSp</span></a>
+<a class="sourceLine" id="cb25-2" title="2"><span class="co"># as well as mean() to compute the survival rate</span></a>
+<a class="sourceLine" id="cb25-3" title="3"><span class="co"># Step 1: group_by</span></a>
+<a class="sourceLine" id="cb25-4" title="4"><span class="co"># Step 2: summarise</span></a>
+<a class="sourceLine" id="cb25-5" title="5">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb25-6" title="6"><span class="st">  </span><span class="kw">group_by</span>(SibSp) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb25-7" title="7"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived), </a>
+<a class="sourceLine" id="cb25-8" title="8">            <span class="dt">count=</span><span class="kw">n</span>())</a></code></pre></div>
+<pre><code>## # A tibble: 7 x 3
+##   SibSp   sur count
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+## 1     0 0.345   608
+## 2     1 0.536   209
+## 3     2 0.464    28
+## 4     3 0.25     16
+## 5     4 0.167    18
+## 6     5 0         5
+## 7     8 0         7</code></pre>
+</div>
+<div id="parch" class="section level2">
+<h2><span class="header-section-number">3.6</span> Parch</h2>
+<p>Number of parents / children aboard the Titanic.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1"><span class="co"># Use summarise and n() to count each Parch</span></a>
+<a class="sourceLine" id="cb27-2" title="2"><span class="co"># as well as mean() to compute the survival rate</span></a>
+<a class="sourceLine" id="cb27-3" title="3"><span class="co"># Step 1: group_by</span></a>
+<a class="sourceLine" id="cb27-4" title="4"><span class="co"># Step 2: summarise</span></a>
+<a class="sourceLine" id="cb27-5" title="5">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb27-6" title="6"><span class="st">  </span><span class="kw">group_by</span>(Parch) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb27-7" title="7"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived), </a>
+<a class="sourceLine" id="cb27-8" title="8">            <span class="dt">count=</span><span class="kw">n</span>())</a></code></pre></div>
+<pre><code>## # A tibble: 7 x 3
+##   Parch   sur count
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+## 1     0 0.344   678
+## 2     1 0.551   118
+## 3     2 0.5      80
+## 4     3 0.6       5
+## 5     4 0         4
+## 6     5 0.2       5
+## 7     6 0         1</code></pre>
+</div>
+<div id="fare" class="section level2">
+<h2><span class="header-section-number">3.7</span> Fare</h2>
+<p>Passenger fare.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" title="1"><span class="co"># Boxplot between SurvivedLabel and Fare</span></a>
+<a class="sourceLine" id="cb29-2" title="2">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb29-3" title="3"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(SurvivedLabel,Fare)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb29-4" title="4"><span class="st">  </span><span class="kw">geom_boxplot</span>()</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" title="1"><span class="co"># Boxplot between factor(Pclass) and Fare</span></a>
+<a class="sourceLine" id="cb30-2" title="2">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb30-3" title="3"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="kw">factor</span>(Pclass),Fare)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb30-4" title="4"><span class="st">  </span><span class="kw">geom_boxplot</span>()</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-11-2.png" width="672" /></p>
+</div>
+<div id="embarked" class="section level2">
+<h2><span class="header-section-number">3.8</span> Embarked</h2>
+<p>Port of Embarkation.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" title="1"><span class="co"># Use summarise and n() to count each Embarked</span></a>
+<a class="sourceLine" id="cb31-2" title="2"><span class="co"># as well as mean() to compute the survival rate</span></a>
+<a class="sourceLine" id="cb31-3" title="3"><span class="co"># Step 1: group_by</span></a>
+<a class="sourceLine" id="cb31-4" title="4"><span class="co"># Step 2: summarise</span></a>
+<a class="sourceLine" id="cb31-5" title="5">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb31-6" title="6"><span class="st">  </span><span class="kw">group_by</span>(Embarked) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb31-7" title="7"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived), </a>
+<a class="sourceLine" id="cb31-8" title="8">            <span class="dt">count=</span><span class="kw">n</span>())</a></code></pre></div>
+<pre><code>## # A tibble: 4 x 3
+##   Embarked   sur count
+##   &lt;chr&gt;    &lt;dbl&gt; &lt;int&gt;
+## 1 C        0.554   168
+## 2 Q        0.390    77
+## 3 S        0.337   644
+## 4 &lt;NA&gt;     1         2</code></pre>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" title="1"><span class="co"># Bar chart for the surival rate</span></a>
+<a class="sourceLine" id="cb33-2" title="2">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb33-3" title="3"><span class="st">  </span><span class="kw">group_by</span>(Embarked) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb33-4" title="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb33-5" title="5"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(Embarked,sur)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb33-6" title="6"><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb33-7" title="7"><span class="st">  </span><span class="kw">geom_text</span>(<span class="kw">aes</span>(<span class="dt">label=</span>scales<span class="op">::</span><span class="kw">percent</span>(sur,</a>
+<a class="sourceLine" id="cb33-8" title="8">                                      <span class="dt">accuracy=</span><span class="fl">0.1</span>,</a>
+<a class="sourceLine" id="cb33-9" title="9">                                      <span class="dt">suffix=</span><span class="st">&quot;%&quot;</span>) ),  </a>
+<a class="sourceLine" id="cb33-10" title="10">            <span class="dt">size=</span><span class="fl">3.5</span>,<span class="dt">vjust=</span><span class="op">-</span><span class="fl">0.25</span>,</a>
+<a class="sourceLine" id="cb33-11" title="11">            <span class="dt">position =</span> <span class="kw">position_dodge</span>(<span class="dt">width =</span> <span class="fl">0.9</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb33-12" title="12"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> scales<span class="op">::</span>percent, <span class="dt">limits =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb33-13" title="13"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">y=</span><span class="st">&quot;Survival Rate&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb33-14" title="14"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>
+<div id="sex-and-pclass" class="section level2">
+<h2><span class="header-section-number">3.9</span> Sex and Pclass</h2>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" title="1"><span class="co"># Survival rates and counts for the combinations of Sex and Pclass</span></a>
+<a class="sourceLine" id="cb34-2" title="2"><span class="co"># Use mutate(SexPclass=paste0(Sex,&quot;_&quot;,Pclass))</span></a>
+<a class="sourceLine" id="cb34-3" title="3"><span class="co"># to create an interaction variable</span></a>
+<a class="sourceLine" id="cb34-4" title="4">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb34-5" title="5"><span class="st">  </span><span class="kw">group_by</span>(Sex,Pclass) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb34-6" title="6"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived),</a>
+<a class="sourceLine" id="cb34-7" title="7">            <span class="dt">count=</span><span class="kw">n</span>()) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb34-8" title="8"><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb34-9" title="9"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">SexPclass=</span><span class="kw">paste0</span>(Sex,<span class="st">&quot;_&quot;</span>,Pclass))</a></code></pre></div>
+<pre><code>## # A tibble: 6 x 5
+##   Sex    Pclass   sur count SexPclass
+##   &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;    
+## 1 female      1 0.968    94 female_1 
+## 2 female      2 0.921    76 female_2 
+## 3 female      3 0.5     144 female_3 
+## 4 male        1 0.369   122 male_1   
+## 5 male        2 0.157   108 male_2   
+## 6 male        3 0.135   347 male_3</code></pre>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" title="1"><span class="co"># Bar chart for the surival rate</span></a>
+<a class="sourceLine" id="cb36-2" title="2">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb36-3" title="3"><span class="st">  </span><span class="kw">group_by</span>(Sex,Pclass) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb36-4" title="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb36-5" title="5"><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb36-6" title="6"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">SexPclass=</span><span class="kw">paste0</span>(Sex,<span class="st">&quot;_&quot;</span>,Pclass)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb36-7" title="7"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(SexPclass,sur)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb36-8" title="8"><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>)</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+</div>
+</div>
+<div id="others" class="section level1 tabset tabset-fade">
+<h1><span class="header-section-number">4</span> Others</h1>
+<div id="correlation" class="section level2">
+<h2><span class="header-section-number">4.1</span> Correlation</h2>
+<p>Find Spearman Rank’s correlations among
+Survived, Pclass, Age, SibSp, Parch, Fare.
+Hint: Use <code>cor(use="complete.obs", method = "spearman")</code>.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" title="1"><span class="kw">library</span>(corrplot)</a></code></pre></div>
+<pre><code>## corrplot 0.84 loaded</code></pre>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" title="1"><span class="co"># Step 1: Use select to keep the columns: Survived, Pclass, Age, SibSp, Parch, Fare</span></a>
+<a class="sourceLine" id="cb39-2" title="2"><span class="co"># Correlations on all the passengers</span></a>
+<a class="sourceLine" id="cb39-3" title="3">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb39-4" title="4"><span class="st">  </span><span class="kw">select</span>(Survived,Pclass,Age, SibSp, Parch, Fare) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb39-5" title="5"><span class="st">  </span><span class="kw">cor</span>(<span class="dt">use=</span><span class="st">&quot;complete.obs&quot;</span>, <span class="dt">method =</span> <span class="st">&quot;spearman&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb39-6" title="6"><span class="st">  </span><span class="kw">corrplot.mixed</span>(<span class="dt">main=</span><span class="st">&quot;Correlations on all the passengers&quot;</span>,</a>
+<a class="sourceLine" id="cb39-7" title="7">                 <span class="dt">mar =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">0</span>))</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" title="1"><span class="co"># Step 1: Use filter to keep observations with Survivied==1</span></a>
+<a class="sourceLine" id="cb40-2" title="2"><span class="co"># Step 2: Use select to keep the columns: Pclass, Age, SibSp, Parch, Fare</span></a>
+<a class="sourceLine" id="cb40-3" title="3"><span class="co"># Correlations on the passengers that survived</span></a>
+<a class="sourceLine" id="cb40-4" title="4">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb40-5" title="5"><span class="st">  </span><span class="kw">filter</span>(Survived<span class="op">==</span><span class="dv">1</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb40-6" title="6"><span class="st">  </span><span class="kw">select</span>(Pclass, Age, SibSp, Parch, Fare) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb40-7" title="7"><span class="st">  </span><span class="kw">cor</span>(<span class="dt">use=</span><span class="st">&quot;complete.obs&quot;</span>, <span class="dt">method =</span> <span class="st">&quot;spearman&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb40-8" title="8"><span class="st">  </span><span class="kw">corrplot.mixed</span>(<span class="dt">main=</span><span class="st">&quot;Correlations on the passengers that survived&quot;</span>,</a>
+<a class="sourceLine" id="cb40-9" title="9">                 <span class="dt">mar =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">0</span>))</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-14-2.png" width="672" /></p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" title="1"><span class="co"># Step 1: Use filter to keep observations with Survivied==0</span></a>
+<a class="sourceLine" id="cb41-2" title="2"><span class="co"># Step 2: Use select to keep the columns: Pclass, Age, SibSp, Parch, Fare</span></a>
+<a class="sourceLine" id="cb41-3" title="3"><span class="co"># Correlations on the passengers that did not survive</span></a>
+<a class="sourceLine" id="cb41-4" title="4">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb41-5" title="5"><span class="st">  </span><span class="kw">filter</span>(Survived<span class="op">==</span><span class="dv">0</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb41-6" title="6"><span class="st">  </span><span class="kw">select</span>(Pclass, Age, SibSp, Parch, Fare) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb41-7" title="7"><span class="st">  </span><span class="kw">cor</span>(<span class="dt">use=</span><span class="st">&quot;complete.obs&quot;</span>, <span class="dt">method =</span> <span class="st">&quot;spearman&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb41-8" title="8"><span class="st">  </span><span class="kw">corrplot.mixed</span>(<span class="dt">main=</span><span class="st">&quot;Correlations on the passengers that did not survive&quot;</span>,</a>
+<a class="sourceLine" id="cb41-9" title="9">                 <span class="dt">mar =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">0</span>))</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-14-3.png" width="672" /></p>
+</div>
+<div id="pairwise-plot" class="section level2">
+<h2><span class="header-section-number">4.2</span> Pairwise plot</h2>
+<p>Create a pairwise plot for variables including
+SurvivedLabel, Pclass, Sex, Age, SibSp, Parch, Fare, Embarked.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" title="1"><span class="kw">library</span>(GGally)</a></code></pre></div>
+<pre><code>## 
+## Attaching package: &#39;GGally&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     nasa</code></pre>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" title="1"><span class="co"># Step 1: Convert Pclass to a factor</span></a>
+<a class="sourceLine" id="cb45-2" title="2"><span class="co"># Step 2: Use select to keep the above mentioned columns</span></a>
+<a class="sourceLine" id="cb45-3" title="3"><span class="co"># Step 3: do ggpairs()</span></a>
+<a class="sourceLine" id="cb45-4" title="4"></a>
+<a class="sourceLine" id="cb45-5" title="5">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb45-6" title="6"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">Pclass=</span><span class="kw">factor</span>(Pclass)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb45-7" title="7"><span class="st">  </span><span class="kw">select</span>(SurvivedLabel, Pclass, Sex, Age, </a>
+<a class="sourceLine" id="cb45-8" title="8">         SibSp, Parch, Fare, Embarked) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb45-9" title="9"><span class="st">  </span><span class="kw">ggpairs</span>()</a></code></pre></div>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-15-1.png" width="1152" /></p>
+</div>
+</div>
+<div id="feature-engineering-on-the-titanicing-set" class="section level1 tabset tabset-fade">
+<h1><span class="header-section-number">5</span> Feature Engineering on the titanicing Set</h1>
+<p>What variable can we add?</p>
+<div id="discretize-age" class="section level2">
+<h2><span class="header-section-number">5.1</span> Discretize Age</h2>
+<p>Use the function <code>cut</code>.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb48-1" title="1"><span class="co"># create age_cut by cutting Age into c(&quot;children&quot;,&quot;adult&quot;,&quot;senior&quot;) </span></a>
+<a class="sourceLine" id="cb48-2" title="2"><span class="kw">summary</span>(titanic<span class="op">$</span>Age)</a></code></pre></div>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&#39;s 
+##    0.42   20.12   28.00   29.70   38.00   80.00     177</code></pre>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" title="1">titanic &lt;-<span class="st"> </span>titanic <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb50-2" title="2"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">age_bin=</span><span class="kw">cut</span>(Age, <span class="dt">breaks =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">18</span>,<span class="dv">60</span>,<span class="dv">80</span>),</a>
+<a class="sourceLine" id="cb50-3" title="3">                     <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;children&quot;</span>,<span class="st">&quot;adult&quot;</span>,<span class="st">&quot;senior&quot;</span>),</a>
+<a class="sourceLine" id="cb50-4" title="4">                     <span class="dt">include.lowest =</span> <span class="ot">TRUE</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb50-5" title="5"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">age_bin=</span><span class="kw">addNA</span>(age_bin)) </a>
+<a class="sourceLine" id="cb50-6" title="6">titanic <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(Age,age_bin) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">print</span>(<span class="dt">n=</span><span class="dv">2</span>)</a></code></pre></div>
+<pre><code>## # A tibble: 891 x 2
+##     Age age_bin
+##   &lt;dbl&gt; &lt;fct&gt;  
+## 1    22 adult  
+## 2    38 adult  
+## # ... with 889 more rows</code></pre>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb52-1" title="1"><span class="co"># Categories with NA (not available, i.e., missing values) added</span></a>
+<a class="sourceLine" id="cb52-2" title="2"><span class="kw">levels</span>(titanic<span class="op">$</span>age_bin)</a></code></pre></div>
+<pre><code>## [1] &quot;children&quot; &quot;adult&quot;    &quot;senior&quot;   NA</code></pre>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb54-1" title="1"><span class="co"># Barplot of survival rate for each age_bin</span></a>
+<a class="sourceLine" id="cb54-2" title="2">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb54-3" title="3"><span class="st">  </span><span class="kw">group_by</span>(age_bin) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb54-4" title="4"><span class="st">  </span><span class="kw">summarize</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb54-5" title="5"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x=</span>age_bin,<span class="dt">y=</span>sur))<span class="op">+</span></a>
+<a class="sourceLine" id="cb54-6" title="6"><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb54-7" title="7"><span class="st">  </span><span class="kw">geom_text</span>(<span class="kw">aes</span>(<span class="dt">label=</span>scales<span class="op">::</span><span class="kw">percent</span>(sur,</a>
+<a class="sourceLine" id="cb54-8" title="8">                                      <span class="dt">accuracy=</span><span class="fl">0.1</span>,</a>
+<a class="sourceLine" id="cb54-9" title="9">                                      <span class="dt">suffix=</span><span class="st">&quot;%&quot;</span>) ),  </a>
+<a class="sourceLine" id="cb54-10" title="10">            <span class="dt">size=</span><span class="fl">3.5</span>,<span class="dt">vjust=</span><span class="op">-</span><span class="fl">0.25</span>,</a>
+<a class="sourceLine" id="cb54-11" title="11">            <span class="dt">position =</span> <span class="kw">position_dodge</span>(<span class="dt">width =</span> <span class="fl">0.9</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb54-12" title="12"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> scales<span class="op">::</span>percent, <span class="dt">limits =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb54-13" title="13"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">y=</span><span class="st">&quot;Survival Rate&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb54-14" title="14"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+</div>
+<div id="discretize-fare" class="section level2">
+<h2><span class="header-section-number">5.2</span> Discretize Fare</h2>
+<p>Use the function <code>cut</code>.</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" title="1"><span class="co"># create fare_cut by cutting Fare into c(&quot;low&quot;,&quot;medium&quot;,&quot;high&quot;)</span></a>
+<a class="sourceLine" id="cb55-2" title="2"><span class="co"># using the first quantile and the third quantile</span></a>
+<a class="sourceLine" id="cb55-3" title="3"><span class="kw">summary</span>(titanic<span class="op">$</span>Fare)</a></code></pre></div>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    0.00    7.91   14.45   32.20   31.00  512.33</code></pre>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb57-1" title="1">titanic &lt;-<span class="st"> </span>titanic <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb57-2" title="2"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">fare_bin=</span><span class="kw">cut</span>(Fare, <span class="dt">breaks =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">8</span>,<span class="dv">31</span>,<span class="dv">550</span>),</a>
+<a class="sourceLine" id="cb57-3" title="3">                     <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;low&quot;</span>,<span class="st">&quot;medium&quot;</span>,<span class="st">&quot;high&quot;</span>),</a>
+<a class="sourceLine" id="cb57-4" title="4">                     <span class="dt">include.lowest =</span> <span class="ot">TRUE</span>))</a>
+<a class="sourceLine" id="cb57-5" title="5">  </a>
+<a class="sourceLine" id="cb57-6" title="6">titanic <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(Fare,fare_bin) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">print</span>(<span class="dt">n=</span><span class="dv">5</span>)</a></code></pre></div>
+<pre><code>## # A tibble: 891 x 2
+##    Fare fare_bin
+##   &lt;dbl&gt; &lt;fct&gt;   
+## 1  7.25 low     
+## 2 71.3  high    
+## 3  7.92 low     
+## 4 53.1  high    
+## 5  8.05 medium  
+## # ... with 886 more rows</code></pre>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb59-1" title="1"><span class="co"># Barplot of survival rate for each fare_bin</span></a>
+<a class="sourceLine" id="cb59-2" title="2">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb59-3" title="3"><span class="st">  </span><span class="kw">group_by</span>(fare_bin) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb59-4" title="4"><span class="st">  </span><span class="kw">summarize</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb59-5" title="5"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x=</span>fare_bin,<span class="dt">y=</span>sur))<span class="op">+</span></a>
+<a class="sourceLine" id="cb59-6" title="6"><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb59-7" title="7"><span class="st">  </span><span class="kw">geom_text</span>(<span class="kw">aes</span>(<span class="dt">label=</span>scales<span class="op">::</span><span class="kw">percent</span>(sur,</a>
+<a class="sourceLine" id="cb59-8" title="8">                                      <span class="dt">accuracy=</span><span class="fl">0.1</span>,</a>
+<a class="sourceLine" id="cb59-9" title="9">                                      <span class="dt">suffix=</span><span class="st">&quot;%&quot;</span>) ),  </a>
+<a class="sourceLine" id="cb59-10" title="10">            <span class="dt">size=</span><span class="fl">3.5</span>,<span class="dt">vjust=</span><span class="op">-</span><span class="fl">0.25</span>,</a>
+<a class="sourceLine" id="cb59-11" title="11">            <span class="dt">position =</span> <span class="kw">position_dodge</span>(<span class="dt">width =</span> <span class="fl">0.9</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb59-12" title="12"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> scales<span class="op">::</span>percent, <span class="dt">limits =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb59-13" title="13"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">y=</span><span class="st">&quot;Survival Rate&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb59-14" title="14"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+</div>
+<div id="family-size" class="section level2">
+<h2><span class="header-section-number">5.3</span> Family size</h2>
+<p>Family size = SibSp + Parch</p>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb60-1" title="1"><span class="co"># Add the variable FamilySize</span></a>
+<a class="sourceLine" id="cb60-2" title="2">titanic &lt;-<span class="st"> </span>titanic <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb60-3" title="3"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">FamilySize=</span>SibSp <span class="op">+</span><span class="st"> </span>Parch)</a>
+<a class="sourceLine" id="cb60-4" title="4"></a>
+<a class="sourceLine" id="cb60-5" title="5"></a>
+<a class="sourceLine" id="cb60-6" title="6"><span class="co"># Use summarise and n() to count each FamilySize</span></a>
+<a class="sourceLine" id="cb60-7" title="7"><span class="co"># as well as mean() to compute the survival rate</span></a>
+<a class="sourceLine" id="cb60-8" title="8"><span class="co"># Step 1: group_by</span></a>
+<a class="sourceLine" id="cb60-9" title="9"><span class="co"># Step 2: summarise</span></a>
+<a class="sourceLine" id="cb60-10" title="10">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb60-11" title="11"><span class="st">  </span><span class="kw">group_by</span>(FamilySize) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb60-12" title="12"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived), </a>
+<a class="sourceLine" id="cb60-13" title="13">            <span class="dt">count=</span><span class="kw">n</span>())</a></code></pre></div>
+<pre><code>## # A tibble: 9 x 3
+##   FamilySize   sur count
+##        &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+## 1          0 0.304   537
+## 2          1 0.553   161
+## 3          2 0.578   102
+## 4          3 0.724    29
+## 5          4 0.2      15
+## 6          5 0.136    22
+## 7          6 0.333    12
+## 8          7 0         6
+## 9         10 0         7</code></pre>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb62-1" title="1"><span class="co"># Bar chart for the surival rate for each FamilySize</span></a>
+<a class="sourceLine" id="cb62-2" title="2">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb62-3" title="3"><span class="st">  </span><span class="kw">group_by</span>(FamilySize) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb62-4" title="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb62-5" title="5"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(FamilySize,sur)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb62-6" title="6"><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb62-7" title="7"><span class="st">  </span><span class="kw">geom_text</span>(<span class="kw">aes</span>(<span class="dt">label=</span>scales<span class="op">::</span><span class="kw">percent</span>(sur,</a>
+<a class="sourceLine" id="cb62-8" title="8">                                      <span class="dt">accuracy=</span><span class="fl">0.1</span>,</a>
+<a class="sourceLine" id="cb62-9" title="9">                                      <span class="dt">suffix=</span><span class="st">&quot;%&quot;</span>) ),  </a>
+<a class="sourceLine" id="cb62-10" title="10">            <span class="dt">size=</span><span class="fl">3.5</span>,<span class="dt">vjust=</span><span class="op">-</span><span class="fl">0.25</span>,</a>
+<a class="sourceLine" id="cb62-11" title="11">            <span class="dt">position =</span> <span class="kw">position_dodge</span>(<span class="dt">width =</span> <span class="fl">0.9</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb62-12" title="12"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> scales<span class="op">::</span>percent, <span class="dt">limits =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb62-13" title="13"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">y=</span><span class="st">&quot;Survival Rate&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb62-14" title="14"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+</div>
+<div id="single" class="section level2">
+<h2><span class="header-section-number">5.4</span> Single</h2>
+<p>According to the family size,
+we can create a variable <code>single</code> which is TRUE if <code>FamilySize&lt;1</code>.</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" title="1"><span class="co"># Add the variable Single</span></a>
+<a class="sourceLine" id="cb63-2" title="2">titanic &lt;-<span class="st"> </span>titanic <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb63-3" title="3"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">Single=</span> FamilySize<span class="op">&lt;</span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb63-4" title="4"></a>
+<a class="sourceLine" id="cb63-5" title="5"><span class="co"># Use summarise and n() to count by Single</span></a>
+<a class="sourceLine" id="cb63-6" title="6"><span class="co"># as well as mean() to compute the survival rate</span></a>
+<a class="sourceLine" id="cb63-7" title="7"><span class="co"># Step 1: group_by</span></a>
+<a class="sourceLine" id="cb63-8" title="8"><span class="co"># Step 2: summarise</span></a>
+<a class="sourceLine" id="cb63-9" title="9">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb63-10" title="10"><span class="st">  </span><span class="kw">group_by</span>(Single) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb63-11" title="11"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived), </a>
+<a class="sourceLine" id="cb63-12" title="12">            <span class="dt">count=</span><span class="kw">n</span>())</a></code></pre></div>
+<pre><code>## # A tibble: 2 x 3
+##   Single   sur count
+##   &lt;lgl&gt;  &lt;dbl&gt; &lt;int&gt;
+## 1 FALSE  0.506   354
+## 2 TRUE   0.304   537</code></pre>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb65-1" title="1"><span class="co"># Bar chart for the surival rate by Single</span></a>
+<a class="sourceLine" id="cb65-2" title="2">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb65-3" title="3"><span class="st">  </span><span class="kw">group_by</span>(Single) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb65-4" title="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb65-5" title="5"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(Single,sur)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb65-6" title="6"><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb65-7" title="7"><span class="st">  </span><span class="kw">geom_text</span>(<span class="kw">aes</span>(<span class="dt">label=</span>scales<span class="op">::</span><span class="kw">percent</span>(sur,</a>
+<a class="sourceLine" id="cb65-8" title="8">                                      <span class="dt">accuracy=</span><span class="fl">0.1</span>,</a>
+<a class="sourceLine" id="cb65-9" title="9">                                      <span class="dt">suffix=</span><span class="st">&quot;%&quot;</span>) ),  </a>
+<a class="sourceLine" id="cb65-10" title="10">            <span class="dt">size=</span><span class="fl">3.5</span>,<span class="dt">vjust=</span><span class="op">-</span><span class="fl">0.25</span>,</a>
+<a class="sourceLine" id="cb65-11" title="11">            <span class="dt">position =</span> <span class="kw">position_dodge</span>(<span class="dt">width =</span> <span class="fl">0.9</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb65-12" title="12"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> scales<span class="op">::</span>percent, <span class="dt">limits =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb65-13" title="13"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">y=</span><span class="st">&quot;Survival Rate&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb65-14" title="14"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+</div>
+<div id="tickets" class="section level2">
+<h2><span class="header-section-number">5.5</span> Tickets</h2>
+<p>There are 891 obervations in this data set but
+only 681 unique tikets.
+So there were passengers with the same ticket.
+This infomation might help predict the survival rate.</p>
+<p>Since there are so many levels for this categorical variable,
+we may use the count encoding for <code>Ticket</code>.</p>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb66-1" title="1"><span class="co"># Create a new variable: shareTicket</span></a>
+<a class="sourceLine" id="cb66-2" title="2"><span class="co"># Step 1: Group by Ticket</span></a>
+<a class="sourceLine" id="cb66-3" title="3"><span class="co"># Step 2: summarise and n() to count the number of passengers for each ticket</span></a>
+<a class="sourceLine" id="cb66-4" title="4"><span class="co"># Step 3: Use mutate to create a varaible shareTicket which is TRUE if the ticket was shared by more than one person</span></a>
+<a class="sourceLine" id="cb66-5" title="5"><span class="co"># Step 4: Join to the original data set</span></a>
+<a class="sourceLine" id="cb66-6" title="6">titanic &lt;-<span class="st"> </span>titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb66-7" title="7"><span class="st">  </span><span class="kw">group_by</span>(Ticket) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb66-8" title="8"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">shareTicket=</span><span class="kw">n</span>()) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb66-9" title="9"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">shareTicket=</span>shareTicket<span class="op">&gt;</span><span class="dv">1</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb66-10" title="10"><span class="st">  </span><span class="kw">right_join</span>(titanic, <span class="dt">by =</span><span class="st">&quot;Ticket&quot;</span>)</a>
+<a class="sourceLine" id="cb66-11" title="11"></a>
+<a class="sourceLine" id="cb66-12" title="12"></a>
+<a class="sourceLine" id="cb66-13" title="13"><span class="co"># Use summarise and n() to count each shareTicket</span></a>
+<a class="sourceLine" id="cb66-14" title="14"><span class="co"># as well as mean() to compute the survival rate</span></a>
+<a class="sourceLine" id="cb66-15" title="15"><span class="co"># Step 1: group_by</span></a>
+<a class="sourceLine" id="cb66-16" title="16"><span class="co"># Step 2: summarise</span></a>
+<a class="sourceLine" id="cb66-17" title="17">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb66-18" title="18"><span class="st">  </span><span class="kw">group_by</span>(shareTicket) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb66-19" title="19"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived), </a>
+<a class="sourceLine" id="cb66-20" title="20">            <span class="dt">count=</span><span class="kw">n</span>())</a></code></pre></div>
+<pre><code>## # A tibble: 2 x 3
+##   shareTicket   sur count
+##   &lt;lgl&gt;       &lt;dbl&gt; &lt;int&gt;
+## 1 FALSE       0.298   547
+## 2 TRUE        0.520   344</code></pre>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb68-1" title="1"><span class="co"># Bar chart for the surival rate for each shareTicket</span></a>
+<a class="sourceLine" id="cb68-2" title="2">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb68-3" title="3"><span class="st">  </span><span class="kw">group_by</span>(shareTicket) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb68-4" title="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">sur=</span><span class="kw">mean</span>(Survived)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb68-5" title="5"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(shareTicket,sur)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb68-6" title="6"><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb68-7" title="7"><span class="st">  </span><span class="kw">geom_text</span>(<span class="kw">aes</span>(<span class="dt">label=</span>scales<span class="op">::</span><span class="kw">percent</span>(sur,</a>
+<a class="sourceLine" id="cb68-8" title="8">                                      <span class="dt">accuracy=</span><span class="fl">0.1</span>,</a>
+<a class="sourceLine" id="cb68-9" title="9">                                      <span class="dt">suffix=</span><span class="st">&quot;%&quot;</span>) ),  </a>
+<a class="sourceLine" id="cb68-10" title="10">            <span class="dt">size=</span><span class="fl">3.5</span>,<span class="dt">vjust=</span><span class="op">-</span><span class="fl">0.25</span>,</a>
+<a class="sourceLine" id="cb68-11" title="11">            <span class="dt">position =</span> <span class="kw">position_dodge</span>(<span class="dt">width =</span> <span class="fl">0.9</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb68-12" title="12"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> scales<span class="op">::</span>percent, <span class="dt">limits =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb68-13" title="13"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">y=</span><span class="st">&quot;Survival Rate&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb68-14" title="14"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
+<p><img src="Titanic_solution_gitbook_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+</div>
+<div id="target-encoding" class="section level2">
+<h2><span class="header-section-number">5.6</span> Target encoding</h2>
+<p>Target encoding for Pclass is not useful because
+the Pclass has too few levels and
+one can apply the one-hot encoding without any difficulty.</p>
+<p>In practice, we do not have the (Survived) labels in the testing set.
+So we will use the what are learnt in the training set for the categories
+appear in testing set.</p>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb69-1" title="1"><span class="co"># Create a new variable: surPclass</span></a>
+<a class="sourceLine" id="cb69-2" title="2"><span class="co"># Step 1: Group by Pclass</span></a>
+<a class="sourceLine" id="cb69-3" title="3"><span class="co"># Step 2: summarise and mean to find the survival ratio for each Pclass</span></a>
+<a class="sourceLine" id="cb69-4" title="4"><span class="co"># Step 3: Join to the original data set</span></a>
+<a class="sourceLine" id="cb69-5" title="5"><span class="co"># Step 4: Add random noises rnorm(nrow(titanic),sd=0.01) to the </span></a>
+<a class="sourceLine" id="cb69-6" title="6">titanic <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb69-7" title="7"><span class="st">  </span><span class="kw">group_by</span>(Pclass) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb69-8" title="8"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">surPclass=</span><span class="kw">mean</span>(Survived)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb69-9" title="9"><span class="st">  </span><span class="kw">right_join</span>(titanic, <span class="dt">by =</span><span class="st">&quot;Pclass&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb69-10" title="10"><span class="st">  </span><span class="kw">select</span>(Pclass,surPclass) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb69-11" title="11"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">surPclass=</span>surPclass<span class="op">+</span><span class="kw">rnorm</span>(<span class="kw">nrow</span>(titanic),<span class="dt">sd=</span><span class="fl">0.01</span>))        <span class="co"># add noise</span></a></code></pre></div>
+<pre><code>## # A tibble: 891 x 2
+##    Pclass surPclass
+##     &lt;dbl&gt;     &lt;dbl&gt;
+##  1      3     0.237
+##  2      1     0.628
+##  3      3     0.248
+##  4      1     0.629
+##  5      3     0.240
+##  6      3     0.244
+##  7      1     0.647
+##  8      3     0.256
+##  9      3     0.244
+## 10      2     0.467
+## # ... with 881 more rows</code></pre>
+</div>
+</div>
+<div id="predict-survival-rate" class="section level1">
+<h1><span class="header-section-number">6</span> Predict Survival Rate</h1>
+<p>We use the logistic regression to model the probability (rate) of survival.</p>
+<p>Data are split into the training set and the testing set.</p>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb71-1" title="1"><span class="co"># Convert categories to factors for variables:  Pclass, Sex, Single, Embarked</span></a>
+<a class="sourceLine" id="cb71-2" title="2"><span class="co"># filter out missing values of Embarked</span></a>
+<a class="sourceLine" id="cb71-3" title="3"><span class="co"># select columns: SurvivedLabel, Pclass, Sex, age_bin, fare_bin, Embarked</span></a>
+<a class="sourceLine" id="cb71-4" title="4"><span class="co"># Assign to a new R object, titanic2</span></a>
+<a class="sourceLine" id="cb71-5" title="5">titanic2 &lt;-<span class="st"> </span>titanic <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb71-6" title="6"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">Pclass=</span><span class="kw">factor</span>(Pclass), <span class="dt">Sex=</span><span class="kw">factor</span>(Sex), </a>
+<a class="sourceLine" id="cb71-7" title="7">         <span class="dt">Single=</span><span class="kw">factor</span>(Single),<span class="dt">Embarked=</span><span class="kw">factor</span>(Embarked)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb71-8" title="8"><span class="st">  </span><span class="kw">filter</span>(<span class="op">!</span><span class="kw">is.na</span>(Embarked)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb71-9" title="9"><span class="st">  </span><span class="kw">select</span>(SurvivedLabel, Pclass, Sex, Single,age_bin, fare_bin, Embarked)</a>
+<a class="sourceLine" id="cb71-10" title="10"></a>
+<a class="sourceLine" id="cb71-11" title="11">titanic2</a></code></pre></div>
+<pre><code>## # A tibble: 889 x 7
+##    SurvivedLabel Pclass Sex    Single age_bin  fare_bin Embarked
+##    &lt;fct&gt;         &lt;fct&gt;  &lt;fct&gt;  &lt;fct&gt;  &lt;fct&gt;    &lt;fct&gt;    &lt;fct&gt;   
+##  1 0             3      male   FALSE  adult    low      S       
+##  2 1             1      female FALSE  adult    high     C       
+##  3 1             3      female TRUE   adult    low      S       
+##  4 1             1      female FALSE  adult    high     S       
+##  5 0             3      male   TRUE   adult    medium   S       
+##  6 0             3      male   TRUE   &lt;NA&gt;     medium   Q       
+##  7 0             1      male   TRUE   adult    high     S       
+##  8 0             3      male   FALSE  children medium   S       
+##  9 1             3      female FALSE  adult    medium   S       
+## 10 1             2      female FALSE  children medium   C       
+## # ... with 879 more rows</code></pre>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb73-1" title="1"><span class="co"># Randomly split into train and test</span></a>
+<a class="sourceLine" id="cb73-2" title="2"><span class="kw">set.seed</span>(<span class="dv">111</span>)</a>
+<a class="sourceLine" id="cb73-3" title="3">train_idx &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(titanic2), <span class="dt">size =</span> <span class="dv">500</span>, <span class="dt">replace =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb73-4" title="4">train &lt;-<span class="st"> </span>titanic2[train_idx,]</a>
+<a class="sourceLine" id="cb73-5" title="5">test &lt;-<span class="st"> </span>titanic2[<span class="op">-</span>train_idx,]</a>
+<a class="sourceLine" id="cb73-6" title="6"></a>
+<a class="sourceLine" id="cb73-7" title="7"><span class="co"># Train logisitc regression model</span></a>
+<a class="sourceLine" id="cb73-8" title="8">fit1 &lt;-<span class="st"> </span><span class="kw">glm</span>(SurvivedLabel<span class="op">~</span>Pclass<span class="op">+</span>Sex<span class="op">+</span>Single<span class="op">+</span>age_bin<span class="op">+</span>fare_bin<span class="op">+</span>Embarked,</a>
+<a class="sourceLine" id="cb73-9" title="9">            <span class="dt">data=</span>train, <span class="dt">family =</span> binomial)</a>
+<a class="sourceLine" id="cb73-10" title="10"></a>
+<a class="sourceLine" id="cb73-11" title="11"><span class="co"># Estimated coefficients and significances</span></a>
+<a class="sourceLine" id="cb73-12" title="12"><span class="kw">summary</span>(fit1)</a></code></pre></div>
+<pre><code>## 
+## Call:
+## glm(formula = SurvivedLabel ~ Pclass + Sex + Single + age_bin + 
+##     fare_bin + Embarked, family = binomial, data = train)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.4928  -0.6540  -0.3768   0.6155   2.7260  
+## 
+## Coefficients:
+##                Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)      4.5157     0.7689   5.873 4.28e-09 ***
+## Pclass2         -1.2712     0.4162  -3.054 0.002259 ** 
+## Pclass3         -2.4474     0.4239  -5.774 7.75e-09 ***
+## Sexmale         -2.5239     0.2631  -9.592  &lt; 2e-16 ***
+## SingleTRUE      -0.2873     0.2935  -0.979 0.327586    
+## age_binadult    -0.9151     0.3495  -2.618 0.008841 ** 
+## age_binsenior   -3.2875     1.2075  -2.723 0.006479 ** 
+## age_binNA       -1.4936     0.4533  -3.295 0.000984 ***
+## fare_binmedium  -0.4861     0.3778  -1.287 0.198169    
+## fare_binhigh    -0.9888     0.5295  -1.867 0.061850 .  
+## EmbarkedQ        0.2941     0.5331   0.552 0.581241    
+## EmbarkedS       -0.4657     0.3040  -1.532 0.125529    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 670.50  on 499  degrees of freedom
+## Residual deviance: 451.27  on 488  degrees of freedom
+## AIC: 475.27
+## 
+## Number of Fisher Scoring iterations: 5</code></pre>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb75-1" title="1"><span class="co"># Perform backward stepwise model selection according to the AIC (smaller is better)</span></a>
+<a class="sourceLine" id="cb75-2" title="2">fit2 &lt;-<span class="st"> </span><span class="kw">step</span>(fit1)</a></code></pre></div>
+<pre><code>## Start:  AIC=475.27
+## SurvivedLabel ~ Pclass + Sex + Single + age_bin + fare_bin + 
+##     Embarked
+## 
+##            Df Deviance    AIC
+## - Single    1   452.23 474.23
+## - fare_bin  2   454.85 474.85
+## &lt;none&gt;          451.27 475.27
+## - Embarked  2   455.48 475.48
+## - age_bin   3   469.44 487.44
+## - Pclass    2   488.62 508.62
+## - Sex       1   563.78 585.78
+## 
+## Step:  AIC=474.23
+## SurvivedLabel ~ Pclass + Sex + age_bin + fare_bin + Embarked
+## 
+##            Df Deviance    AIC
+## - fare_bin  2   454.86 472.86
+## &lt;none&gt;          452.23 474.23
+## - Embarked  2   456.48 474.48
+## - age_bin   3   472.61 488.61
+## - Pclass    2   488.87 506.87
+## - Sex       1   572.85 592.85
+## 
+## Step:  AIC=472.86
+## SurvivedLabel ~ Pclass + Sex + age_bin + Embarked
+## 
+##            Df Deviance    AIC
+## &lt;none&gt;          454.86 472.86
+## - Embarked  2   459.98 473.98
+## - age_bin   3   473.51 485.51
+## - Pclass    2   497.43 511.43
+## - Sex       1   573.88 589.88</code></pre>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb77-1" title="1"><span class="kw">summary</span>(fit2) <span class="co">#Single, fare_bin is removed</span></a></code></pre></div>
+<pre><code>## 
+## Call:
+## glm(formula = SurvivedLabel ~ Pclass + Sex + age_bin + Embarked, 
+##     family = binomial, data = train)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.4510  -0.6891  -0.4373   0.6375   2.4170  
+## 
+## Coefficients:
+##               Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)     3.4197     0.4582   7.464 8.42e-14 ***
+## Pclass2        -0.9470     0.3497  -2.708 0.006762 ** 
+## Pclass3        -1.9294     0.3118  -6.187 6.12e-10 ***
+## Sexmale        -2.4639     0.2469  -9.980  &lt; 2e-16 ***
+## age_binadult   -0.8586     0.3275  -2.622 0.008737 ** 
+## age_binsenior  -3.2461     1.1941  -2.718 0.006559 ** 
+## age_binNA      -1.4251     0.4260  -3.345 0.000823 ***
+## EmbarkedQ       0.4133     0.5240   0.789 0.430276    
+## EmbarkedS      -0.4668     0.3046  -1.532 0.125405    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 670.50  on 499  degrees of freedom
+## Residual deviance: 454.86  on 491  degrees of freedom
+## AIC: 472.86
+## 
+## Number of Fisher Scoring iterations: 5</code></pre>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb79-1" title="1"><span class="co"># Predict the survival rates for passengers in the testing set</span></a>
+<a class="sourceLine" id="cb79-2" title="2">pred_fit2 &lt;-<span class="st"> </span><span class="kw">predict</span>(fit2, <span class="dt">newdata =</span> test, </a>
+<a class="sourceLine" id="cb79-3" title="3">                     <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>, <span class="dt">se.fit =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb79-4" title="4"><span class="co"># Format the predictions</span></a>
+<a class="sourceLine" id="cb79-5" title="5">format_pred &lt;-<span class="st"> </span><span class="kw">tibble</span>(<span class="dt">predSurv=</span><span class="kw">ifelse</span>(pred_fit2<span class="op">$</span>fit<span class="op">&gt;</span><span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">0</span>),</a>
+<a class="sourceLine" id="cb79-6" title="6">                      <span class="dt">survRate=</span>pred_fit2<span class="op">$</span>fit,</a>
+<a class="sourceLine" id="cb79-7" title="7">                      <span class="dt">se=</span>pred_fit2<span class="op">$</span>se.fit)</a>
+<a class="sourceLine" id="cb79-8" title="8">format_pred</a></code></pre></div>
+<pre><code>## # A tibble: 389 x 3
+##    predSurv survRate     se
+##       &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;
+##  1        1   0.928  0.0234
+##  2        0   0.0912 0.0207
+##  3        0   0.121  0.0469
+##  4        1   0.890  0.0311
+##  5        0   0.0912 0.0207
+##  6        0   0.0912 0.0207
+##  7        1   0.736  0.0646
+##  8        1   0.759  0.0543
+##  9        0   0.363  0.125 
+## 10        1   0.516  0.107 
+## # ... with 379 more rows</code></pre>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb81-1" title="1"><span class="co"># Accuracy</span></a>
+<a class="sourceLine" id="cb81-2" title="2"><span class="kw">mean</span>(format_pred<span class="op">$</span>predSurv <span class="op">==</span><span class="st"> </span>test<span class="op">$</span>SurvivedLabel)</a></code></pre></div>
+<pre><code>## [1] 0.7994859</code></pre>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb83-1" title="1"><span class="co"># Confusion table</span></a>
+<a class="sourceLine" id="cb83-2" title="2"><span class="kw">table</span>(<span class="dt">Prediction=</span>format_pred<span class="op">$</span>predSurv, <span class="dt">Truth=</span>test<span class="op">$</span>SurvivedLabel)</a></code></pre></div>
+<pre><code>##           Truth
+## Prediction   0   1
+##          0 210  42
+##          1  36 101</code></pre>
+<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb85-1" title="1"><span class="co">#------------- Forecasts for all combinations ------------------#</span></a>
+<a class="sourceLine" id="cb85-2" title="2">newtest &lt;-<span class="st"> </span><span class="kw">expand.grid</span>( <span class="dt">Pclass =</span> <span class="kw">c</span>(<span class="st">&quot;1&quot;</span>,<span class="st">&quot;2&quot;</span>,<span class="st">&quot;3&quot;</span>),</a>
+<a class="sourceLine" id="cb85-3" title="3">                        <span class="dt">Sex =</span> <span class="kw">c</span>(<span class="st">&quot;male&quot;</span>,<span class="st">&quot;female&quot;</span>),</a>
+<a class="sourceLine" id="cb85-4" title="4">                        <span class="dt">age_bin =</span> <span class="kw">c</span>(<span class="st">&quot;children&quot;</span>,<span class="st">&quot;adult&quot;</span>,<span class="st">&quot;senior&quot;</span>,<span class="ot">NA</span>),</a>
+<a class="sourceLine" id="cb85-5" title="5">                        <span class="dt">Embarked =</span> <span class="kw">c</span>(<span class="st">&quot;C&quot;</span>,<span class="st">&quot;Q&quot;</span>,<span class="st">&quot;S&quot;</span>))</a>
+<a class="sourceLine" id="cb85-6" title="6">pred_newtest &lt;-<span class="st"> </span><span class="kw">predict</span>(fit2, <span class="dt">newdata =</span> newtest, </a>
+<a class="sourceLine" id="cb85-7" title="7">                     <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</a>
+<a class="sourceLine" id="cb85-8" title="8"></a>
+<a class="sourceLine" id="cb85-9" title="9"><span class="co"># Format</span></a>
+<a class="sourceLine" id="cb85-10" title="10"><span class="kw">as_tibble</span>(newtest) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb85-11" title="11"><span class="st">  </span><span class="kw">bind_cols</span>(<span class="kw">tibble</span>(<span class="dt">survRate=</span>pred_newtest)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb85-12" title="12"><span class="st">  </span><span class="kw">arrange</span>(<span class="kw">desc</span>(survRate)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb85-13" title="13"><span class="st">  </span><span class="kw">print</span>(<span class="dt">n=</span><span class="dv">100</span>)</a></code></pre></div>
+<pre><code>## # A tibble: 72 x 5
+##    Pclass Sex    age_bin  Embarked survRate
+##    &lt;fct&gt;  &lt;fct&gt;  &lt;fct&gt;    &lt;fct&gt;       &lt;dbl&gt;
+##  1 1      female children Q         0.979  
+##  2 1      female children C         0.968  
+##  3 1      female adult    Q         0.951  
+##  4 1      female children S         0.950  
+##  5 2      female children Q         0.947  
+##  6 1      female adult    C         0.928  
+##  7 2      female children C         0.922  
+##  8 1      female &lt;NA&gt;     Q         0.917  
+##  9 1      female adult    S         0.890  
+## 10 2      female adult    Q         0.884  
+## 11 2      female children S         0.881  
+## 12 1      female &lt;NA&gt;     C         0.880  
+## 13 3      female children Q         0.870  
+## 14 2      female adult    C         0.834  
+## 15 1      female &lt;NA&gt;     S         0.822  
+## 16 3      female children C         0.816  
+## 17 2      female &lt;NA&gt;     Q         0.812  
+## 18 1      male   children Q         0.797  
+## 19 2      female adult    S         0.759  
+## 20 2      female &lt;NA&gt;     C         0.740  
+## 21 3      female adult    Q         0.740  
+## 22 3      female children S         0.736  
+## 23 1      male   children C         0.722  
+## 24 3      female adult    C         0.653  
+## 25 1      female senior   Q         0.643  
+## 26 2      female &lt;NA&gt;     S         0.641  
+## 27 1      male   adult    Q         0.625  
+## 28 1      male   children S         0.620  
+## 29 3      female &lt;NA&gt;     Q         0.617  
+## 30 2      male   children Q         0.604  
+## 31 1      female senior   C         0.543  
+## 32 3      female adult    S         0.541  
+## 33 1      male   adult    C         0.524  
+## 34 3      female &lt;NA&gt;     C         0.516  
+## 35 2      male   children C         0.502  
+## 36 1      male   &lt;NA&gt;     Q         0.486  
+## 37 1      female senior   S         0.427  
+## 38 2      female senior   Q         0.411  
+## 39 1      male   adult    S         0.409  
+## 40 3      female &lt;NA&gt;     S         0.401  
+## 41 2      male   adult    Q         0.393  
+## 42 2      male   children S         0.387  
+## 43 1      male   &lt;NA&gt;     C         0.385  
+## 44 3      male   children Q         0.363  
+## 45 2      female senior   C         0.316  
+## 46 2      male   adult    C         0.299  
+## 47 1      male   &lt;NA&gt;     S         0.282  
+## 48 3      male   children C         0.274  
+## 49 2      male   &lt;NA&gt;     Q         0.268  
+## 50 2      female senior   S         0.224  
+## 51 2      male   adult    S         0.211  
+## 52 3      female senior   Q         0.207  
+## 53 2      male   &lt;NA&gt;     C         0.195  
+## 54 3      male   adult    Q         0.195  
+## 55 3      male   children S         0.191  
+## 56 3      female senior   C         0.147  
+## 57 3      male   adult    C         0.138  
+## 58 1      male   senior   Q         0.133  
+## 59 2      male   &lt;NA&gt;     S         0.132  
+## 60 3      male   &lt;NA&gt;     Q         0.121  
+## 61 3      female senior   S         0.0977 
+## 62 1      male   senior   C         0.0919 
+## 63 3      male   adult    S         0.0912 
+## 64 3      male   &lt;NA&gt;     C         0.0833 
+## 65 1      male   senior   S         0.0597 
+## 66 2      male   senior   Q         0.0560 
+## 67 3      male   &lt;NA&gt;     S         0.0539 
+## 68 2      male   senior   C         0.0378 
+## 69 2      male   senior   S         0.0240 
+## 70 3      male   senior   Q         0.0217 
+## 71 3      male   senior   C         0.0145 
+## 72 3      male   senior   S         0.00913</code></pre>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 3
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsubsection",
+"scroll_highlight": true
+},
+"toolbar": {
+"position": "fixed"
+},
+"search": false
+});
+});
+</script>
+
+</body>
+
+</html>

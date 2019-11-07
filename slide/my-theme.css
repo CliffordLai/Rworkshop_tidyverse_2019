@@ -1,0 +1,9 @@
+.large { font-size: 140% }
+.median { font-size: 120% }
+.small { font-size: 58% }
+
+
+pre {
+  max-width: 100%;
+  max-height: 100%;
+}

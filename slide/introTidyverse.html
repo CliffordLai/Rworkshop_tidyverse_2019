@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Data Manipulation in R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Yuanhao Lai" />
+    <meta name="date" content="2019-11-06" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/chocolate-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Data Manipulation in R
+### Yuanhao Lai
+### Western Data Science Solutions
+### 2019-11-06
+
+---
+
+
+
+
+class: inverse, center, middle
+
+# Data Analysis
+
+---
+# Workflow
+
+&lt;img src="fig/workflow.png" width="80%" /&gt;
+
+---
+
+# tidyverse
+
+```r
+library(tidyverse)
+```
+
+```
+## -- Attaching packages ------------------------------------------------------------------------- tidyverse 1.2.1 --
+```
+
+```
+## √ ggplot2 3.2.0     √ purrr   0.3.2
+## √ tibble  2.1.3     √ dplyr   0.8.3
+## √ tidyr   0.8.3     √ stringr 1.4.0
+## √ readr   1.3.1     √ forcats 0.4.0
+```
+
+```
+## -- Conflicts ---------------------------------------------------------------------------- tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+```
+
+---
+# tidyverse - The Book
+.large[
+.pull-left[
+- Overview of data sciences with tidyverse.
+- Written by the author of tidyverse!
+- Free Ebook online.
+]
+]
+
+.pull-right[
+&lt;img src="fig/Rbook.png" width="70%" /&gt;
+]
+
+---
+# tidyverse - The Cheatsheet
+&lt;img src="fig/cheat1.png" width="50%" /&gt;&lt;img src="fig/cheat2.png" width="50%" /&gt;
+
+---
+# Iris data
+
+This famous (Fisher's or Anderson's) iris data set gives the measurements in centimeters of the variables sepal length and width and petal length and width, respectively, for 50 flowers from each of 3 species of iris.
+
+![](introTidyverse_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+
+---
+class: inverse, center, middle
+
+# Data Transformation
+
+---
+#  Pipe operator
+.large[
+It is not a must but it makes the code more readable.
+The functions in Tidyverse were designed to adapt to '%&gt;%'.
+]
+
+```r
+c(1,2,9,4,5,7,8) %&gt;% mean()  
+```
+
+```
+## [1] 5.142857
+```
+
+```r
+mean(c(1,2,9,4,5,7,8)) #equivalent
+```
+
+```
+## [1] 5.142857
+```
+
+The pipe, '%&gt;%', comes from the package 'magrittr', which is loaded
+automatically by tidyverse.
+
+---
+# Why dplyr
+
+Compared to the base R data manipulation, `dplyr` is,
+
+.large[
+- Faster.
+- Simple philosophy: data frame in, data frame out.
+- Syntax simplicity and ease of use.
+]
+---
+#  Data Transformation
+
+.large[
+- as_tibble: an alternative format to data.frame. 
+- glimpse: get a glimpse of your data.
+- select: subset by columns (variables).
+- filter: subset rows (observations) meeting one or more conditions.
+- arrange: sort data by variables.
+- mutate: create new variables.
+- summarize: compute summary statistics of data subsets.
+- group_by: divide data into groups for later operations.
+]
+
+Most of the above operations have variants with postfix `_if`, `_at`, or `_all`.
+
+---
+class: center, middle
+
+# Iris data
+
+.large[
+See "dataTransform.Rmd" for examples.
+]
+
+---
+class: inverse, center, middle
+
+# Data Visualization
+
+---
+
+# ggplot2
+
+.median[
+.pull-left[
+- ggplot2 is a plotting system for R.
+- One of the most elegant and most versatile.
+- Created by Hadley Wickham.
+- Based on the `The Grammar of Graphic`.
+- Do more faster by learning one sys‐
+tem and applying it in many places.
+]
+]
+
+.pull-right[
+&lt;img src="fig/book.png" width="100%" /&gt;
+]
+
+
+---
+# Why ggplot2?
+https://github.com/tidyverse/ggplot2/wiki/Why-use-ggplot2
+
+
+.median[
+- Automatic legends, colors, etc.
+- The “default” output is much nicer than with base graphics.
+- Store any ggplot2 object for modification or future recall.
+- Flexibility, intuitiveness, and logic of the mapping 
+between the data and its representation. 
+]
+
+---
+#  ggplot2 Concepts
+
+.pull-left[
+.large[
+- Data and Mapping
+- Scale
+- &lt;span style="     color: red !important;" &gt;Geom&lt;/span&gt;etric
+- &lt;span style="     color: red !important;" &gt;Stat&lt;/span&gt;istics
+- &lt;span style="     color: red !important;" &gt;Coord&lt;/span&gt;inates
+- Layer
+- Facet
+]
+]
+
+.pull-right[
+&lt;img src="fig/ggplot2Grammar.png" width="903" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Data and Mapping
+.median[
+Mapping controls the relationship between variables of data.
+In ggplot2, we use &lt;span style="     color: red !important;" &gt;aes&lt;/span&gt;thetic 
+to control the mapping.
+]
+&lt;img src="fig/mapData.png" width="1545" style="display: block; margin: auto;" /&gt;
+
+---
+# Scale
+.median[
+Scale controls the format of the graphical output,
+related to the mapping.
+]
+&lt;img src="fig/scale.png" width="1169" style="display: block; margin: auto;" /&gt;
+
+---
+# &lt;span style="     color: red !important;" &gt;Geom&lt;/span&gt;etric
+.median[
+Graphical objects on the plots, e.g., points, lines, polygons.
+]
+&lt;img src="fig/Geoms.png" width="384" style="display: block; margin: auto;" /&gt;
+
+
+---
+# &lt;span style="     color: red !important;" &gt;Stat&lt;/span&gt;istics
+.median[
+Compute quantitative values/summary statistics of the data
+and add them to the graph, e.g., the linear regression line, the density.
+]
+&lt;img src="fig/stat.png" width="868" style="display: block; margin: auto;" /&gt;
+
+---
+# &lt;span style="     color: red !important;" &gt;Coord&lt;/span&gt;inates
+.median[
+The visualization perspective, e.g., a grid.
+]
+&lt;img src="fig/coord.png" width="1131" style="display: block; margin: auto;" /&gt;
+
+---
+# Layer
+.median[
+A combination of data, mapping, geometrics, statistics and coordinates,
+which can be built step by step in ggplot2.
+]
+&lt;img src="fig/layer.png" width="516" style="display: block; margin: auto;" /&gt;
+
+---
+# Facet
+.median[
+Data are grouped by certain conditions and visualization is done for each group.
+]
+&lt;img src="fig/facet.png" width="1017" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Visualization Types
+.pull-left[
+.large[
+- Scatterplot
+- Bar chart
+- Box plot
+- Density/Histogram plot
+- Pie chart
+]
+]
+
+.pull-right[
+&lt;img src="fig/ggplot2Grammar.png" width="903" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: center, middle
+
+# Iris data
+
+.large[
+See "dataVisualize.Rmd" for examples.
+]
+
+---
+class: inverse, center, middle
+
+# Feature Engineering
+
+---
+class: inverse, center, middle
+
+.large[
+Data determine the upper limit of machine learning, 
+and models just approach this upper limit.
+
+Feature engineering helps models spend less effort in learning data.
+]
+
+---
+
+# Feature engineering
+
+.large[
+Feature Engineering aims at creating additional relevant features 
+from the existing raw features in the data,
+and to increase the predictive power of the learning algorithm.
+]
+
+.large[
+- Most creative aspect of Data Science.
+- Hold brainstorming sessions.
+- Often require domain knowledges.
+- Revist previous experiences.
+]
+
+---
+class: inverse, center, middle
+
+# Data: Survival in Sinking Titanic 
+
+---
+# Survival in Sinking Titanic 
+
+https://www.kaggle.com/c/titanic/overview
+
+The sinking of the RMS Titanic is one of the most infamous shipwrecks in history. 
+One of the reasons that the shipwreck 
+led to such loss of life was that there were not enough lifeboats for the passengers and crew.
+The objective of this data set is to predict which passengers survived the tragedy.
+
+
+
+
+```
+## Observations: 891
+## Variables: 12
+## $ PassengerId &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,...
+## $ Survived    &lt;dbl&gt; 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0,...
+## $ Pclass      &lt;dbl&gt; 3, 1, 3, 1, 3, 3, 1, 3, 3, 2, 3, 1, 3, 3, 3, 2, 3,...
+## $ Name        &lt;chr&gt; "Braund, Mr. Owen Harris", "Cumings, Mrs. John Bra...
+## $ Sex         &lt;chr&gt; "male", "female", "female", "female", "male", "mal...
+## $ Age         &lt;dbl&gt; 22, 38, 26, 35, 35, NA, 54, 2, 27, 14, 4, 58, 20, ...
+## $ SibSp       &lt;dbl&gt; 1, 1, 0, 1, 0, 0, 0, 3, 0, 1, 1, 0, 0, 1, 0, 0, 4,...
+## $ Parch       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 1, 0, 0, 5, 0, 0, 1,...
+## $ Ticket      &lt;chr&gt; "A/5 21171", "PC 17599", "STON/O2. 3101282", "1138...
+## $ Fare        &lt;dbl&gt; 7.2500, 71.2833, 7.9250, 53.1000, 8.0500, 8.4583, ...
+## $ Cabin       &lt;chr&gt; NA, "C85", NA, "C123", NA, NA, "E46", NA, NA, NA, ...
+## $ Embarked    &lt;chr&gt; "S", "C", "S", "S", "S", "Q", "S", "S", "S", "C", ...
+```
+
+---
+# Survival in Sinking Titanic 
+
+&lt;style type="text/css"&gt;
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+&lt;/style&gt;
+&lt;table class="tg"&gt;
+  &lt;tr&gt;
+    &lt;th class="tg-0pky"&gt;Variable&lt;/th&gt;
+    &lt;th class="tg-0pky"&gt;Definition&lt;/th&gt;
+    &lt;th class="tg-0pky"&gt;Key&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="tg-0pky"&gt;survival&lt;/td&gt;
+    &lt;td class="tg-0pky"&gt;Survival&lt;/td&gt;
+    &lt;td class="tg-0pky"&gt;0 = No, 1 = Yes&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="tg-0pky"&gt;pclass&lt;/td&gt;
+    &lt;td class="tg-0pky"&gt;Ticket class&lt;/td&gt;
+    &lt;td class="tg-0pky"&gt;1 = 1st, 2 = 2nd, 3 = 3rd&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="tg-0pky"&gt;sex&lt;/td&gt;
+    &lt;td class="tg-0pky"&gt;Sex&lt;/td&gt;
+    &lt;td class="tg-0pky"&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="tg-0lax"&gt;Age&lt;/td&gt;
+    &lt;td class="tg-0lax"&gt;Age in years&lt;/td&gt;
+    &lt;td class="tg-0lax"&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="tg-0lax"&gt;sibsp&lt;/td&gt;
+    &lt;td class="tg-0lax"&gt;# of siblings / spouses aboard the Titanic&lt;/td&gt;
+    &lt;td class="tg-0lax"&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="tg-0lax"&gt;parch&lt;/td&gt;
+    &lt;td class="tg-0lax"&gt;# of parents / children aboard the Titanic&lt;/td&gt;
+    &lt;td class="tg-0lax"&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="tg-0lax"&gt;ticket&lt;/td&gt;
+    &lt;td class="tg-0lax"&gt;Ticket number&lt;/td&gt;
+    &lt;td class="tg-0lax"&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="tg-0lax"&gt;fare&lt;/td&gt;
+    &lt;td class="tg-0lax"&gt;Passenger fare&lt;/td&gt;
+    &lt;td class="tg-0lax"&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="tg-0lax"&gt;cabin&lt;/td&gt;
+    &lt;td class="tg-0lax"&gt;Cabin number&lt;/td&gt;
+    &lt;td class="tg-0lax"&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="tg-0lax"&gt;embarked&lt;/td&gt;
+    &lt;td class="tg-0lax"&gt;Port of Embarkation&lt;/td&gt;
+    &lt;td class="tg-0lax"&gt;C = Cherbourg, Q = Queenstown, S = Southampton&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+
+---
+# Missing rate
+
+
+```r
+# Count by summarize_all
+train %&gt;%
+  summarize_all(list(~sum(is.na(.))/n())) %&gt;%
+  gather(key = "variable",value="missingRate")
+```
+
+```
+## # A tibble: 12 x 2
+##    variable    missingRate
+##    &lt;chr&gt;             &lt;dbl&gt;
+##  1 PassengerId     0      
+##  2 Survived        0      
+##  3 Pclass          0      
+##  4 Name            0      
+##  5 Sex             0      
+##  6 Age             0.199  
+##  7 SibSp           0      
+##  8 Parch           0      
+##  9 Ticket          0      
+## 10 Fare            0      
+## 11 Cabin           0.771  
+## 12 Embarked        0.00224
+```
+
+---
+
+# Countinuous/numerical variable
+
+.large[
+- Binning/discretization, e.g., divide age into categories of children, adult, senior;
+- Standarization/Normalization, important in training a neural network;
+- Log, minmax transformation, ...
+]
+
+---
+
+# Binning/discretization
+
+.large[
+In industry, continuous variables are always discretized first when fitting a logistic regression or a linear regression. 
+
+- Improve interpretation sometimes;
+- Discretized variables is less sensitive to outliers;
+- Discretizing produces more categories/variables and enhances the non-linearity/representation power of the linear model;
+- Allow to add more interactions from discretized variables.
+]
+
+---
+# Discretize Age
+
+To discretize a continuous variable in R, we use the function `cut`.
+
+
+```r
+summary(train$Age)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+##    0.42   20.12   28.00   29.70   38.00   80.00     177
+```
+
+```r
+train &lt;- train %&gt;%
+  mutate(age_bin=cut(Age, breaks = c(0,18,60,80),
+                     labels=c("children","adult","senior"),
+                     include.lowest = TRUE)) %&gt;%
+  mutate(age_bin=addNA(age_bin)) 
+train %&gt;% select(Age,age_bin) %&gt;% print(n=2)
+```
+
+```
+## # A tibble: 891 x 2
+##     Age age_bin
+##   &lt;dbl&gt; &lt;fct&gt;  
+## 1    22 adult  
+## 2    38 adult  
+## # ... with 889 more rows
+```
+
+```r
+# Categories with NA (not available, i.e., missing values) added
+levels(train$age_bin)
+```
+
+```
+## [1] "children" "adult"    "senior"   NA
+```
+
+---
+
+# Categorical variable
+
+.large[
+- Always appear in practice.
+- High cardinality can create very sparse data.
+- Difficult to impute missing.
+]
+
+
+---
+
+# Encoding
+.median[
+Mathematical models can not treat categorical variables directly.
+Instead, categorical variables are encoded before they are passed to the model.
+Encoding here means that we use some numerical variables to represent a categorical variable.
+]
+
+https://www.slideshare.net/HJvanVeen/feature-engineering-72376750
+
+.large[
+- One Hot Encoding (Dummy variables)
+- Hash encoding
+- Label encoding
+- Count encoding
+- Target encoding
+- Category Embedding
+- NaN encoding
+]
+
+---
+
+# One-hot encoding
+.median[
+It is also called dummy variables. 
+For example, to represent the ticket class `Pclass`, 
+which has three levels, 1,2,3, 
+we can create two dummy variables.
+]
+
+
+```r
+model.matrix(~factor(Pclass),data=train) %&gt;% 
+  head()
+```
+
+```
+##   (Intercept) factor(Pclass)2 factor(Pclass)3
+## 1           1               0               1
+## 2           1               0               0
+## 3           1               0               1
+## 4           1               0               0
+## 5           1               0               1
+## 6           1               0               1
+```
+
+
+---
+
+# One-hot encoding
+
+.median[
+- Most basic method without information loss.
+- Sparse format is memory-friendly
+- Most current implementations don’t gracefully treat
+missing, unseen variables 
+]
+
+---
+
+# Count encoding
+.median[
+There are 891 obervations in this Titanic data set 
+but only 681 unique tikets.
+So there were passengers with the same ticket.
+We can then use the number of passengers for each ticket
+to represent each ticket.
+]
+
+
+```r
+train %&gt;% 
+  group_by(Ticket) %&gt;%
+  summarise(shareTicket=n()) %&gt;% 
+  right_join(train, by ="Ticket") %&gt;%
+  select(Ticket,shareTicket) %&gt;%
+  print(n=4)
+```
+
+```
+## # A tibble: 891 x 2
+##   Ticket           shareTicket
+##   &lt;chr&gt;                  &lt;int&gt;
+## 1 A/5 21171                  1
+## 2 PC 17599                   1
+## 3 STON/O2. 3101282           1
+## 4 113803                     2
+## # ... with 887 more rows
+```
+
+---
+# Count encoding
+.median[
+In essense, it means that the frequency of a level for a factor
+is related to the quantity of interest.
+]
+
+.median[
+- Replace categorical variables with their count in the
+training set.
+- Suitable when a variable has many levels even some of them is rare.
+- Useful for both linear and non-linear algorithms.
+- Can be sensitive to outliers.
+- May add log-transform, works well with counts.
+- Replace unseen variables with `1`.
+- May give collisions: same encoding, different variables.
+]
+
+---
+
+# Target encoding
+
+.median[
+Encode categorical variables by their ratio of target (binary
+classification or regression).
+
+- Be careful to avoid overfit! (Leakage)
+- Form of stacking: single-variable model which outputs average target.
+- Do in cross-validation manner
+- Add random noise to combat overfit
+- Suitable when a variable has many levels but each of them is not rare.
+]
+
+---
+
+# Target encoding
+
+
+```r
+reftable &lt;- train %&gt;% 
+  group_by(Pclass) %&gt;%
+  summarise(surPclass=mean(Survived)) 
+reftable
+```
+
+```
+## # A tibble: 3 x 2
+##   Pclass surPclass
+##    &lt;dbl&gt;     &lt;dbl&gt;
+## 1      1     0.630
+## 2      2     0.473
+## 3      3     0.242
+```
+
+```r
+reftable %&gt;%
+  right_join(train, by ="Pclass") %&gt;%
+  select(Pclass,surPclass) %&gt;%
+  mutate(surPclass=surPclass+rnorm(nrow(train),sd=0.01)) %&gt;%  # add noise
+  print(n=4)
+```
+
+```
+## # A tibble: 891 x 2
+##   Pclass surPclass
+##    &lt;dbl&gt;     &lt;dbl&gt;
+## 1      3     0.247
+## 2      1     0.618
+## 3      3     0.250
+## 4      1     0.619
+## # ... with 887 more rows
+```
+
+---
+class: center, middle
+
+# Exercise
+
+.large[
+See "Titanic_working.Rmd".
+]
+
+---
+class: center, middle
+
+# Thank You!
+&lt;!-- Feedback Link: --&gt;
+
+&lt;!-- https://forms.gle/dbyUnk5SF9UkgkcBA --&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"navigation": {
+"scroll": true
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
