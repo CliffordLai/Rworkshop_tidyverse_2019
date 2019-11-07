@@ -33,8 +33,7 @@ data(iris)
 iris %>% View()
 
 iris # lengthy output
-iris %>% as_tibble() #tibble, simple Data Frames, 
-
+iris %>% as_tibble() #tibble, simple Data Frames
 iris %>%
   as_tibble() %>%
   print(n=15)
@@ -58,36 +57,43 @@ str(iris)
 
 ## Subset by columns with `select`
 
-tibble in, tibble out
-
 ```{r}
 ?select
 iris %>% names()
 
 # Select the first two variables
-#by name
-#by index
+iris %>% select(Sepal.Length,Sepal.Width) #by name
+iris %>% select(1,2) #by index
 
 # Select all but one variable 
-
+iris %>% select(-Sepal.Length)
 
 # Select columns of which names contain "Length"
-
+iris %>% select(contains('Len'))
 
 # Only want numerical variables
-
+iris %>% select_if(is.numeric)
 
 # A problem occur if one directly apply a function to tibble
+mean(as.data.frame(iris)[,1])
 
+iris %>%
+  select(Sepal.Length) %>% 
+  mean()
+
+iris$Sepal.Length %>% mean()
 
 # Extract a column as a vector with pull
-
+iris %>% pull(Sepal.Length) %>% mean() 
 
 # Or use summarize
-
+iris %>%
+  select(Sepal.Length) %>% 
+  summarise_all(mean)
 
 # To save the result, you need to assign it to a (new) object
-
+irisSub1 <- iris %>%
+  select(Sepal.Length,Sepal.Width)
 
 ```
 
@@ -98,19 +104,26 @@ iris %>% names()
 ?filter
 
 # Keep rows by one condition
-
+iris %>%
+  filter(Species=="virginica") 
 
 # Keep rows by two conditions
-
+iris %>%
+  filter(Species=="virginica", 
+         Sepal.Length>7) #by two variables
 
 # Remove rows with missing Sepal.Length though there is no missing value
-
+iris %>% 
+  filter(!is.na(Sepal.Length))
 
 # Remove rows with missing values thought there is no
-
+iris %>% drop_na()
 
 # Find the average of Petal.Length for the Species of virginica
-
+iris %>%
+  filter(Species=="virginica") %>%
+  pull(Sepal.Length) %>%
+  mean()
 
 ```
 
@@ -120,11 +133,13 @@ iris %>% names()
 ```{r}
 ?arrange
 
-# sort rows by Sepal.Length
+iris %>% arrange(Sepal.Length)
 
 # descending order
+iris %>% arrange(desc(Sepal.Length)) 
 
 # sort by the orders of multiple variables
+iris %>% arrange(Sepal.Length, Sepal.Width)
 ```
 
 
@@ -133,17 +148,23 @@ iris %>% names()
 ```{r}
 ?mutate
 
-# create Sepal.LW=Sepal.Length/Sepal.Width
-# create Sepal.Area=Sepal.Length*Sepal.Width
 iris$Sepal.diff <- iris$Sepal.Length-iris$Sepal.Width
 
+iris <- iris %>% 
+  mutate(Sepal.LW=Sepal.Length/Sepal.Width,
+         Sepal.Area=Sepal.Length*Sepal.Width)
 
-
+iris %>% print(width=100)
 
 # Overwrite the old variable
+iris <- iris %>% 
+  mutate(Sepal.Width=Sepal.Width+1)
 
 # The order of new variables matters!
-
+iris %>%
+  mutate(SepalLW=Sepal.Length/Sepal.Width,
+         PetalLW=Petal.Length/Petal.Width,
+         DiffLW=SepalLW/PetalLW)
 ```
 
 ## Compute summary statistics for each column with `summarise_all`
@@ -152,23 +173,36 @@ iris$Sepal.diff <- iris$Sepal.Length-iris$Sepal.Width
 ?summarise_all
 
 # Different ways of computing the column means
-# 1: colMeans
-# 2: apply
-# 3: summarise_all
+iris %>%
+  select(-Species) %>%
+  colMeans()
+
+iris %>%
+  select(-Species) %>%
+  apply(2,mean)
+
+iris %>%
+  select(-Species) %>%
+  summarise_all(mean)
 
 # Count the missing values
-# Use ~(sum(is.na(.))/n())
-# It is equivalent to
+iris %>%
+  summarize_all( ~list(sum(is.na(.))/n()))
+
+# ~list() is called Lambda/Anonymous function
+# ~list(sum(is.na(.))/n()) is equivalent to
 # function(x){sum(is.na(x)/length(x))}
-# ~ is called Lambda/Anonymous function
+iris %>%
+  summarize_all( function(x){sum(is.na(x)/length(x))} )
 
-
-
-# Gather columns into key-value pairs (transpose data frame)
-
+# Gather columns into key-value pairs
+iris %>%
+  summarize_all( ~list(sum(is.na(.))/n())) %>%
+  gather(key = "variable",value="missingRate")
 
 # Count the unique values for each column
-# use n_distinct
+iris %>%
+  summarize_all(n_distinct)
 
 ```
 
@@ -178,10 +212,14 @@ iris$Sepal.diff <- iris$Sepal.Length-iris$Sepal.Width
 ```{r}
 ?summarise
 
-# compute and return a tibble
-# m1=mean(Sepal.Length)
-# v1=var(Sepal.Length)
+iris %>%
+  summarise(m1=mean(Sepal.Length),
+            v1=var(Sepal.Length))
 
+iris %>%
+  mutate(m1=mean(Sepal.Length),
+            v1=var(Sepal.Length)) %>%
+  print(width=100)
 ```
 
 ## Compute summary statistics for each group with `summarize` and `group_by`
@@ -189,14 +227,26 @@ iris$Sepal.diff <- iris$Sepal.Length-iris$Sepal.Width
 Notice that the group attribute will be resolved after a summary function is applied.
 
 ```{r}
-# The base R way (aggregate) of computing summation of each variable within each group
+# The base R way of computing summation of each variable within each group
+iris %>%
+  select(-Species) %>%
+  aggregate(by=list(Species=iris$Species),FUN=sum)
 
-
-# Add the group attribute by group_by so that 
+# Add the group attribute so that 
 # tidyverse knows a groupwise summary statistics should be computed
+iris %>%
+  group_by(Species)
 
-  
-# Force a data.frame() output  
+iris %>%
+  group_by(Species) %>%
+  summarise_all(mean)
+
+iris %>%
+  group_by(Species) %>%
+  summarize(m1=mean(Sepal.Length),
+            m2=mean(Sepal.Width),
+            count=n()) %>%
+  print.data.frame()
 ```
 
 ## Rowise group with 'rowwise'
@@ -207,15 +257,26 @@ the maximum between sepal (petal) length and sepal (petal) width for each sample
 then we can obtain the result by
 
 ```{r}
-# rowwise()
-
-# Find the max(Sepal.Length, Sepal.Width)
-# and max(Petal.Length, Petal.Width).
+iris %>%
+  select(-Species) %>%
+  rowwise()
 
 # Notice the group attribute still exists
+iris %>%
+  select(-Species) %>%
+  rowwise() %>%
+  mutate(Sepal.Max=max(Sepal.Length,Sepal.Width),
+         Petal.Max=max(Petal.Length,Petal.Width)) %>%
+  select(Sepal.Length,Sepal.Width,Sepal.Max)
+
+
 # Use ungroup() to resolve it
-
-
+iris %>%
+  select(-Species) %>%
+  rowwise() %>%
+  mutate(Sepal.Max=max(Sepal.Length,Sepal.Width),
+         Petal.Max=max(Petal.Length,Petal.Width)) %>%
+  ungroup()
 
 
 ```
@@ -227,27 +288,45 @@ then we can obtain the result by
 iris2 <- iris %>%   
   mutate(longSepal=ifelse(Sepal.Length>5.8,"Y","N"))
 
-# group attribute has two layers Species,longSepal
-
-# mutate does not change group index
-
+# group attribute has two layers
+iris2 %>% 
+  group_by(Species,longSepal)
 
 # One summarize unfold one group layer
+iris2 %>% 
+  group_by(Species,longSepal) %>%
+  summarize_all(mean) 
 
+iris2 %>% 
+  group_by(Species,longSepal) %>%
+  summarize_all(mean) %>%
+  ungroup()
+
+iris2 %>% 
+  group_by(Species,longSepal) %>%
+  summarize_all(mean) %>%
+  select(-longSepal) %>%
+  summarize_all(mean)
 ```
 
 
 ## Join the summary results back to the data with `left_join`
 
 ```{r}
-# 1. Summary the mean for each column by Species
-# 2. Rename columns
+irisSummary <- iris %>%
+  group_by(Species) %>%
+  summarise_all(mean) %>%
+  rename(meanSL=Sepal.Length,
+         meanSW=Sepal.Width,
+         meanPL=Petal.Length,
+         meanPW=Petal.Width)
 
 # Traditional way of renaming columns
 #names(irisSummary) <- c("Species", "meanSL", "meanSW", "meanPL", "meanPW")
 
-# Join the information back to the original data by matching Species
-
+iris %>% 
+  left_join(irisSummary, by="Species") %>%
+  print(n=10, width=100)
 ```
 
 ## Use `left_join` or `right_join` to check the overlap between two data sets
@@ -263,7 +342,7 @@ str_replace_all(c("abaab","b","cb"), "b", "c")
 str_replace_all(c("abaab","b","cb"), "[ab]", "c")
 
 # set the working directory
-setwd("C:/Users/Hao/Dropbox/newtermphd/Term12/Rworkshop_tidyverse_2019/example/")
+# setwd("C:/Users/Hao/Dropbox/newtermphd/Term12/Rworkshop_tidyverse_2019/example/")
 
 # read_csv
 morning <- read_csv("IntermediateR_2019Nov_anonymous.csv",skip = 2)
@@ -291,6 +370,7 @@ sum(afternoon$Email %in% morning$Email)
 # write_csv, na option
 
 ```
+
 
 
 

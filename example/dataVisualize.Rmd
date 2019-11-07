@@ -55,54 +55,90 @@ iris %>%
 Use `+` to combine elements.
 
 ```{r}
-# scale_color_manual(values =c('blue','red','yellow'))
-
+iris %>% 
+  ggplot(aes(x=Sepal.Length, y=Sepal.Width,
+             colour = Species))+
+  geom_point() +
+  scale_color_manual(values =c('blue','red','yellow'))
 ```
 
 
 ### data + mapping + geom + stats
 
 ```{r}
-# stat_smooth()
+iris %>% 
+  ggplot(aes(x=Sepal.Length, y=Sepal.Width,
+             colour = Species))+
+  geom_point()+
+  stat_smooth()
 
 # An equivalent way to produce the same figure:
-# every component has its own mapping relationship
+ggplot()+
+  geom_point(data=iris, aes(x=Sepal.Length, y=Sepal.Width,
+                       colour = Species),size=2)+
+  stat_smooth(data=iris, aes(x=Sepal.Length, y=Sepal.Width,
+                        colour = Species))
 ```
 
 
 ### data + mapping + geom + stats + coordinate
 
 ```{r}
-# Sub region with coord_cartesian(xlim = c(5, 7),ylim=c(2,3))
+# Sub region
+iris %>% 
+  ggplot(aes(x=Sepal.Length, y=Sepal.Width,
+             colour = Species))+
+  geom_point()+
+  stat_smooth()+
+  coord_cartesian(xlim = c(5, 7),ylim=c(2,3))
 
 ```
 
 ### Add description
 
 ```{r}
-# ggtitle
-# labs
-# theme(text = element_text(size=14),
-#       legend.position="bottom",
-#       axis.text.x = element_text(angle = -10) )
-
-
-
+iris %>% 
+  ggplot(aes(x=Sepal.Length, y=Sepal.Width,
+             colour = Species))+
+  geom_point()+
+  stat_smooth()+
+  ggtitle("Width vs Length (Sepal)")+ 
+  labs(x="sepal length",y="sepal width")+
+  theme(text = element_text(size=14),
+        legend.position="bottom",
+        axis.text.x = element_text(angle = -10) )
 ```
 
 ### data + mapping + geom + stats + facet
 
 ```{r}
-# facet_grid(~Species)
-# multi-panel seperated by Species
-
+iris %>% 
+  ggplot(aes(x=Sepal.Length, y=Sepal.Width))+
+  geom_point()+
+  stat_smooth()+
+#  facet_grid(~Species)+
+  facet_grid(Species~.)+
+  ggtitle("Width vs Length (Sepal)")+
+  labs(x="sepal length",y="sepal width")+
+  theme_bw()
 ```
 
 ### Restore and save figures
 
 ```{r}
-#ggsave(p1,filename = "p1.png",width = 7,height=5)
+p1 <- iris %>% 
+  ggplot(aes(x=Sepal.Length, y=Sepal.Width,
+             colour = Species))+
+  geom_point()+
+  stat_smooth()+
+  ggtitle("Width vs Length (Sepal)")+ 
+  labs(x="sepal length",y="sepal width")+
+  theme(text = element_text(size=14),
+        legend.position="bottom",
+        axis.text.x = element_text(angle = -10) )
 
+p1
+#ggsave(p1,filename = "p1.png",width = 7,height=5)
 
 ```
 
@@ -289,8 +325,6 @@ ggmap(map_london) +
   )
 
 ```
-
-
 
 # Errors in package references
 

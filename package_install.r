@@ -20,4 +20,9 @@ pacman::p_load(plotly,
 #   if(!require(packname,character.only = TRUE)) install.packages(pkgs=packname)
 # }
 
+# Pull R scripts from RMD file
+library(knitr)
+purl("local/dataVisualize.Rmd")
+purl("local/dataTransform.Rmd")
+
 
